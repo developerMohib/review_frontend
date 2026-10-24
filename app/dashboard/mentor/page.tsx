@@ -1,5 +1,11 @@
-import MentorDashboard from "@/components/mentor/MentorDashboard";
+import React from 'react';
 
-export default function MentorPage() {
-  return <MentorDashboard />;
-}
+const page = () => {
+  return (
+    <div>
+      <h1>mentro dashboard</h1>
+    </div>
+  );
+};
+
+export default page;
