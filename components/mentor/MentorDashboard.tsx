@@ -29,7 +29,7 @@ import { Submission } from "@/lib/validators/submission.validation";
 import { getAllSubmissionsRequest } from "@/lib/api/submission";
 
 
-type FilterStatus = "ALL" | "PENDING" | "APPROVED" | "REJECTED";
+type FilterStatus = "all" | "pendign" | "approved" | "rejected";
 
 interface SubmissionStats {
   total: number;
@@ -38,12 +38,12 @@ interface SubmissionStats {
   rejected: number;
 }
 
-export default function ReviewDashboard() {
+export default function MentorDashboard() {
   const stats: SubmissionStats = { total: 0, pending: 0, approved: 0, rejected: 0 };
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
   
-  const [statusFilter, setStatusFilter] = useState<FilterStatus>("ALL");
+  const [statusFilter, setStatusFilter] = useState<FilterStatus>("all");
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = 1;
 

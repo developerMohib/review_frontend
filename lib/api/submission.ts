@@ -20,7 +20,6 @@ export const getMySubmissionsRequest = async () => {
 };
 export const getAllSubmissionsRequest = async () => {
   const res = await api.get<MySubmissionsResponse>("/submissions/all");
-
   return {
     message: res.data.message,
     submissions: res.data.data,
