@@ -12,6 +12,7 @@ import {
   Send,
   Settings2,
 } from "lucide-react";
+import { UserRole, UserData } from "@/types"; // UserData ইম্পোর্ট করা হলো
 
 const mentorNavigation = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
@@ -24,14 +25,17 @@ const studentNavigation = [
   { href: "/dashboard/student/submission", label: "My submission", icon: FilePlus2 },
 ];
 
-export default function Sidebar({
-  role,
-  onSignOut,
-}: {
-  role: "student" | "mentor";
+// ✅ ১. Props ইন্টারফেস সংজ্ঞায়িত করা (Best Practice)
+interface SidebarProps {
+  role: UserRole;
   onSignOut: () => void;
-}) {
+  user?: UserData | null; // ভবিষ্যতে নাম বা ইমেইল দেখানোর জন্য অপশনাল রাখা হলো
+}
+
+export default function Sidebar({ role, onSignOut }: SidebarProps) {
   const pathname = usePathname();
+
+  // ✅ ২. "STUNDENT" টাইপো ঠিক করে "student" (lowercase) করা হয়েছে, যা আপনার UserRole টাইপের সাথে ম্যাচ করে
   const navigation = role === "student" ? studentNavigation : mentorNavigation;
   const home = role === "student" ? "/dashboard/student" : "/dashboard";
 
@@ -43,7 +47,10 @@ export default function Sidebar({
 
       <div className="workspace-switcher">
         <div className="workspace-mark">CR</div>
-        <div className="workspace-copy"><strong>Project workspace</strong><span>Free plan</span></div>
+        <div className="workspace-copy">
+          <strong>Project workspace</strong>
+          <span>Free plan</span>
+        </div>
         <ChevronDown size={15} />
       </div>
 
@@ -53,8 +60,13 @@ export default function Sidebar({
           const active = label === "Overview"
             ? pathname === href
             : pathname === href || pathname.startsWith(`${href}/`);
+          
           return (
-            <Link key={href} href={href} className={active ? "sidebar-link active" : "sidebar-link"}>
+            <Link 
+              key={href} 
+              href={href} 
+              className={active ? "sidebar-link active" : "sidebar-link"}
+            >
               <Icon size={18} strokeWidth={1.8} />
               <span>{label}</span>
               {label === "Review projects" && <span className="nav-count">8</span>}
@@ -66,12 +78,18 @@ export default function Sidebar({
       <div className="sidebar-bottom">
         <div className="sidebar-tip">
           <div className="tip-icon"><Settings2 size={16} /></div>
+          {/* ✅ ৩. টাইপের সাথে ম্যাচ করার জন্য "student" (lowercase) ব্যবহার করা হয়েছে */}
           <strong>{role === "student" ? "Keep building" : "Thoughtful reviews matter"}</strong>
-          <p>{role === "student" ? "Every submission is a step forward. Share your next idea with the community." : "A few thoughtful notes can help a project move forward."}</p>
+          <p>
+            {role === "student" 
+              ? "Every submission is a step forward. Share your next idea with the community." 
+              : "A few thoughtful notes can help a project move forward."}
+          </p>
           <Link href={role === "student" ? "/dashboard/student/submit" : "/dashboard/mentor"}>
             {role === "student" ? "Start a submission" : "Open review queue"} <span>→</span>
           </Link>
         </div>
+        
         <button type="button" className="sidebar-logout" onClick={onSignOut}>
           <LogOut size={17} /> Sign out
         </button>

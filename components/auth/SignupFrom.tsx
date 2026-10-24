@@ -9,7 +9,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { ArrowRight, Check, Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
-import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 
@@ -17,15 +16,7 @@ import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/axios";
 import { getErrorMessage } from "@/lib/api/auth";
-
-
-export const signupSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
-
-export type SignupInput = z.infer<typeof signupSchema>;
+import { SignupInput, signupSchema } from "@/lib/validators/auth.validation";
 
 export default function SignupForm() {
   const [showPass, setShowPass] = useState(false);

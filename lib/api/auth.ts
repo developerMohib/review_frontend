@@ -1,23 +1,25 @@
+// lib/api/auth.ts
 import { isAxiosError } from "axios";
 import { api } from "@/lib/axios";
 import { LoginInput } from "../validators/auth.validation";
+import { UserData } from "@/types";
 
-export interface AuthUser {
-  id: string;
-  name: string;
-  email: string;
-  role: "STUDENT" | "MENTOR" | "ADMIN";
+interface LoginResponse {
+  success: boolean;
+  message: string;
+  data: {
+    user: UserData;
+    token: string;
+  };
 }
 
 export const loginRequest = async (input: LoginInput) => {
-  const res = await api.post<{ success: boolean; message: string; data: AuthUser }>(
-    "/auth/login",
-    input,
-  );
+  const res = await api.post<LoginResponse>("/auth/login", input);
   
-  return { 
-    message: res.data.message, 
-    user: res.data.data 
+  return {
+    message: res.data.message,
+    user: res.data.data.user,
+    token: res.data.data.token,
   };
 };
 

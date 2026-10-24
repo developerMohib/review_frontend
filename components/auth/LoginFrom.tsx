@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -23,17 +23,18 @@ import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field
 import { Input } from "@/components/ui/input";
 import { getErrorMessage, loginRequest } from "@/lib/api/auth";
 import { LoginInput, loginSchema } from "@/lib/validators/auth.validation";
+import { UserRole } from "@/types";
 
 export default function LoginForm() {
   const [showPass, setShowPass] = useState(false);
-  
+const router = useRouter()
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: "", password: "" },
   });
 
   // 🚀 Auto-fill Demo Credentials Function
-  const fillDemoCredentials = (role: "student" | "mentor") => {
+  const fillDemoCredentials = (role: UserRole) => {
     if (role === "student") {
       form.setValue("email", "student@example.com");
       form.setValue("password", "password123");
@@ -45,23 +46,27 @@ export default function LoginForm() {
     }
   };
 
-  const { mutate, isPending } = useMutation({
-    mutationFn: loginRequest,
-    onSuccess: (response) => {
-      const { message, user } = response;
-      toast.success(message || "Login successful!");
-      setTimeout(() => {
-        const isStudent = user.role === "STUDENT";
-        redirect(isStudent ? "/dashboard/student" : "/dashboard");
-      }, 500);
-    },
-    onError: (error) => {
-      const errorMsg = getErrorMessage(error);
-      toast.error(errorMsg);
-      form.setError("root", { message: errorMsg });
-    },
-  });
-
+const { mutate, isPending } = useMutation({
+  mutationFn: loginRequest,
+  onSuccess: (response) => {
+    const { message, user } = response;
+    
+    toast.success(message || "Login successful!");
+    
+    if (user.role === "mentor") {
+      router.push("/dashboard/mentor");
+    } else if (user.role === "admin") {
+      router.push("/dashboard/admin");
+    } else {
+      router.push("/dashboard/student");
+    }
+  },
+  onError: (error) => {
+    const errorMsg = getErrorMessage(error);
+    toast.error(errorMsg);
+    form.setError("root", { message: errorMsg });
+  },
+});
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-6 bg-background px-4 py-10">
       <Link href="/" aria-label="CodeRabbit home" className="mb-2">
@@ -90,7 +95,7 @@ export default function LoginForm() {
         </CardHeader>
 
         <CardContent className="space-y-5 pt-4">
-          
+
           {/* 🚀 Demo Credentials Buttons */}
           <div className="grid grid-cols-2 gap-3">
             <Button
@@ -133,7 +138,7 @@ export default function LoginForm() {
                       className="h-11 border-border bg-white text-foreground placeholder:text-muted focus:border-(--orange) focus:ring-3 focus:ring-(--orange)/10 transition-all"
                     />
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-.                  </Field>
+                    .                  </Field>
                 )}
               />
 
@@ -146,9 +151,9 @@ export default function LoginForm() {
                       <FieldLabel htmlFor="password" className="text-foreground">
                         Password
                       </FieldLabel>
-                      <Button 
-                        type="button" 
-                        variant="link" 
+                      <Button
+                        type="button"
+                        variant="link"
                         className="text-button h-auto p-0 text-xs font-semibold"
                       >
                         Forgot password?
@@ -190,9 +195,9 @@ export default function LoginForm() {
               )}
 
               {/* Primary Submit Button matching your CSS */}
-              <Button 
-                type="submit" 
-                className="primary-button auth-submit w-full h-11 text-sm font-semibold mt-2" 
+              <Button
+                type="submit"
+                className="primary-button auth-submit w-full h-11 text-sm font-semibold mt-2"
                 disabled={isPending}
               >
                 {isPending ? (

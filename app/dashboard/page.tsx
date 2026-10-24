@@ -1,5 +1,7 @@
-import MentorDashboard from "@/components/mentor/MentorDashboard";
+import DashboardPageBasedRole from "@/components/shared/DashboardPageBasedRole";
 
 export default function DashboardPage() {
-  return <MentorDashboard />;
+  return <DashboardPageBasedRole />;
 }
+
+export const instant = false;
