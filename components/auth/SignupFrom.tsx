@@ -11,6 +11,7 @@ import { ArrowRight, Check, Eye, EyeOff, Loader2, ShieldCheck } from "lucide-rea
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import AuthShowcase from "@/components/auth/AuthShowcase";
 
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -26,7 +27,6 @@ export default function SignupForm() {
     defaultValues: { name: "", email: "", password: "" },
   });
 
-  // ২. API Mutation for Registration
   const { mutate, isPending } = useMutation({
     mutationFn: async (data: SignupInput) => {
       const response = await api.post<{ success: boolean; message: string }>("/auth/register", data);
@@ -39,10 +39,10 @@ export default function SignupForm() {
       }, 1000);
     },
     onError: (error) => {
-          const errorMsg = getErrorMessage(error);
-          toast.error(errorMsg);
-          form.setError("root", { message: errorMsg });
-        },
+      const errorMsg = getErrorMessage(error);
+      toast.error(errorMsg);
+      form.setError("root", { message: errorMsg });
+    },
   });
 
   const onSubmit = (data: SignupInput) => {
@@ -50,12 +50,13 @@ export default function SignupForm() {
   };
 
   return (
-    <main className="signup-page flex min-h-screen flex-col items-center px-4 py-10 bg-background">
-      <Link className="brand-link mb-6" href="/" aria-label="CodeRabbit home">
-        <Image src="/coderabbit-logo.png" alt="CodeRabbit" width={226} height={36} priority />
-      </Link>
+    <main className="auth-page signup-page">
+      <section className="auth-panel signup-panel">
+        <Link className="brand-link" href="/" aria-label="CodeRabbit home">
+          <Image src="/coderabbit-logo.png" alt="CodeRabbit" width={620} height={96} priority />
+        </Link>
 
-      <section className="signup-card w-full max-w-md border border-border bg-white shadow-sm rounded-xl">
+      <section className="signup-card auth-card w-full max-w-md border border-border bg-white shadow-sm rounded-xl">
         <div className="eyebrow mb-3">
           <span className="eyebrow-dot" /> YOUR NEXT STEP STARTS HERE
         </div>
@@ -68,7 +69,6 @@ export default function SignupForm() {
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="auth-form space-y-4">
           <FieldGroup>
-            {/* Name Field */}
             <Controller
               name="name"
               control={form.control}
@@ -89,7 +89,6 @@ export default function SignupForm() {
               )}
             />
 
-            {/* Email Field */}
             <Controller
               name="email"
               control={form.control}
@@ -111,7 +110,6 @@ export default function SignupForm() {
               )}
             />
 
-            {/* Password Field */}
             <Controller
               name="password"
               control={form.control}
@@ -145,14 +143,12 @@ export default function SignupForm() {
               )}
             />
 
-            {/* Root Error Message */}
             {form.formState.errors.root && (
               <p className="text-sm text-red-500 font-medium text-center" role="alert">
                 {form.formState.errors.root.message}
               </p>
             )}
 
-            {/* Submit Button */}
             <Button
               type="submit"
               className="primary-button auth-submit w-full h-11 text-sm font-semibold mt-2"
@@ -186,6 +182,8 @@ export default function SignupForm() {
       <p className="signup-footer flex items-center gap-1.5 mt-6 text-xs text-muted">
         <ShieldCheck size={15} className="text-green-600" /> Your project journey, all in one place.
       </p>
+      </section>
+      <AuthShowcase />
     </main>
   );
 }

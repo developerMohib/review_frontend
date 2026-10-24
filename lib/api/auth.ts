@@ -29,3 +29,11 @@ export const getErrorMessage = (error: unknown) => {
   }
   return "Something went wrong";
 };
+
+// for client com
+
+export async function getMe(): Promise<UserData> {
+  const response = await api.get<{ data: UserData }>("/auth/me");
+
+  return response.data.data;
+}

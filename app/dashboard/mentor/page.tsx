@@ -1,11 +1,6 @@
-import React from 'react';
+import MentorDashboard from '@/components/mentor/MentorDashboard';
 
-const page = () => {
-  return (
-    <div>
-      <h1>mentro dashboard</h1>
-    </div>
-  );
-};
-
-export default page;
+export default function MentorDashboardPage() {
+  return <MentorDashboard />;
+}
+export const instant = false
