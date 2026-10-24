@@ -52,3 +52,14 @@ export const getAllSubmissionsRequest = async (params?: {
   const res = await api.get<MySubmissionsResponse>(url);
   return res.data.data;
 };
+
+export const updateSubmissionStatusRequest = async (
+  submissionId: string,
+  status: "approved" | "rejected"
+) => {
+  const res = await api.patch(`/submissions/update/${submissionId}`, {
+    status,
+  });
+
+  return res.data;
+};
