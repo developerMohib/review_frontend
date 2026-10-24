@@ -11,6 +11,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import AuthShowcase from "@/components/auth/AuthShowcase";
 import {
   Card,
   CardContent,
@@ -27,13 +28,12 @@ import { UserRole } from "@/types";
 
 export default function LoginForm() {
   const [showPass, setShowPass] = useState(false);
-const router = useRouter()
+  const router = useRouter();
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: "", password: "" },
   });
 
-  // 🚀 Auto-fill Demo Credentials Function
   const fillDemoCredentials = (role: UserRole) => {
     if (role === "student") {
       form.setValue("email", "student@example.com");
@@ -50,7 +50,7 @@ const { mutate, isPending } = useMutation({
   mutationFn: loginRequest,
   onSuccess: (response) => {
     const { message, user } = response;
-    
+
     toast.success(message || "Login successful!");
     
     if (user.role === "mentor") {
@@ -68,18 +68,19 @@ const { mutate, isPending } = useMutation({
   },
 });
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-6 bg-background px-4 py-10">
-      <Link href="/" aria-label="CodeRabbit home" className="mb-2">
-        <Image
-          src="/coderabbit-logo.png"
-          alt="CodeRabbit"
-          width={226}
-          height={36}
-          priority
-        />
-      </Link>
+    <main className="auth-page">
+      <section className="auth-panel">
+        <Link href="/" aria-label="CodeRabbit home" className="brand-link">
+          <Image
+            src="/coderabbit-logo.png"
+            alt="CodeRabbit"
+            width={620}
+            height={96}
+            priority
+          />
+        </Link>
 
-      <Card className="w-full max-w-md border-border shadow-sm">
+      <Card className="auth-card w-full max-w-md border-border shadow-sm">
         <CardHeader className="space-y-3 pb-2">
           {/* Custom Eyebrow from your CSS */}
           <div className="eyebrow">
@@ -96,7 +97,6 @@ const { mutate, isPending } = useMutation({
 
         <CardContent className="space-y-5 pt-4">
 
-          {/* 🚀 Demo Credentials Buttons */}
           <div className="grid grid-cols-2 gap-3">
             <Button
               type="button"
@@ -138,7 +138,7 @@ const { mutate, isPending } = useMutation({
                       className="h-11 border-border bg-white text-foreground placeholder:text-muted focus:border-(--orange) focus:ring-3 focus:ring-(--orange)/10 transition-all"
                     />
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                    .                  </Field>
+                  </Field>
                 )}
               />
 
@@ -151,13 +151,6 @@ const { mutate, isPending } = useMutation({
                       <FieldLabel htmlFor="password" className="text-foreground">
                         Password
                       </FieldLabel>
-                      <Button
-                        type="button"
-                        variant="link"
-                        className="text-button h-auto p-0 text-xs font-semibold"
-                      >
-                        Forgot password?
-                      </Button>
                     </div>
 
                     <div className="relative">
@@ -194,7 +187,6 @@ const { mutate, isPending } = useMutation({
                 </p>
               )}
 
-              {/* Primary Submit Button matching your CSS */}
               <Button
                 type="submit"
                 className="primary-button auth-submit w-full h-11 text-sm font-semibold mt-2"
@@ -215,7 +207,7 @@ const { mutate, isPending } = useMutation({
         <CardFooter className="flex-col gap-4 border-t border-border pt-6">
           <p className="text-sm text-muted text-center">
             New to CodeRabbit?{" "}
-            <Link href="/signup" className="font-semibold text---orange-dark) underline underline-offset-4 hover:text-(--orange) transition-colors">
+            <Link href="/signup" className="font-semibold text-(--orange-dark) underline underline-offset-4 hover:text-(--orange) transition-colors">
               Create an account
             </Link>
           </p>
@@ -227,6 +219,8 @@ const { mutate, isPending } = useMutation({
           </div>
         </CardFooter>
       </Card>
+      </section>
+      <AuthShowcase />
     </main>
   );
 }

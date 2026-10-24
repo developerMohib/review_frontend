@@ -1,24 +1,17 @@
 "use client";
 
-import { redirect, useRouter } from "next/navigation";
+import { redirect, usePathname, useRouter } from "next/navigation";
 import { type ReactNode, useRef, useState } from "react";
 import { isAxiosError } from "axios";
-import { Bell, ChevronDown, Search, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
+import {
+  Avatar,
+  AvatarFallback,
+} from "@/components/ui/avatar";
 
 import Sidebar from "@/components/shared/Sidebar";
 import { api } from "@/lib/axios";
@@ -32,13 +25,6 @@ interface CurrentUserResponse {
   success: boolean;
   data: UserData;
 }
-
-
-const pageTitles: Record<UserRole, string> = {
-  student: "Student Dashboard",
-  mentor: "Review projects",
-  admin: "Review projects",
-};
 
 function isUnauthenticated(error: unknown): boolean {
   return isAxiosError(error) && error.response?.status === 401;
@@ -54,11 +40,10 @@ export default function DashboardShell({
   children,
 }: DashboardShellProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const queryClient = useQueryClient();
 
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-
-  // Prevent repeated logout requests before the next render.
   const logoutInProgress = useRef(false);
 
   const {
@@ -75,34 +60,27 @@ export default function DashboardShell({
   });
 
   const handleSignOut = async (): Promise<void> => {
-    if (logoutInProgress.current) {
-      return;
-    }
+    if (logoutInProgress.current) return;
 
     logoutInProgress.current = true;
     setIsLoggingOut(true);
 
     try {
       try {
-        // Your Axios client should attach any required CSRF header.
         await api.post("/auth/logout");
       } catch (error: unknown) {
-        // An expired/missing auth session is already logged out.
         if (!isUnauthenticated(error)) {
           throw error;
         }
       }
 
-      // Stop in-flight queries before clearing private cached data.
       await queryClient.cancelQueries();
       queryClient.clear();
 
       toast.success("Logged out successfully");
-
       router.replace("/login");
     } catch (error: unknown) {
       console.error("Logout failed:", error);
-
       toast.error("Failed to log out. Please try again.");
     } finally {
       logoutInProgress.current = false;
@@ -123,12 +101,10 @@ export default function DashboardShell({
     );
   }
 
-  // redirect() is valid here during rendering, outside event handlers.
   if (isError && isUnauthenticated(error)) {
     redirect("/login");
   }
 
-  // A network/server failure is not necessarily a logged-out session.
   if (isError || !userData) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background px-6 text-center">
@@ -136,10 +112,7 @@ export default function DashboardShell({
           We could not load your account. Please try again.
         </p>
 
-        <Button
-          onClick={() => void refetch()}
-          disabled={isFetching}
-        >
+        <Button onClick={() => void refetch()} disabled={isFetching}>
           {isFetching && (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           )}
@@ -159,119 +132,63 @@ export default function DashboardShell({
     .toUpperCase()
     .slice(0, 2);
 
+  const pageTitle = pathname.startsWith("/dashboard/student/submit")
+    ? "Submit a project"
+    : pathname.startsWith("/dashboard/student/submission")
+      ? "My submissions"
+      : pathname.startsWith("/dashboard/student")
+        ? "Overview"
+        : pathname.startsWith("/dashboard/mentor")
+          ? "Review projects"
+          : role === "student"
+            ? "Overview"
+            : "Dashboard";
+
   return (
     <div className="dashboard-shell">
       <Sidebar
         role={role}
-        onSignOut={handleSignOut}
+        onSignOut={() => void handleSignOut()}
+        isLoggingOut={isLoggingOut}
       />
 
       <div className="dashboard-content">
-        <header className="topbar flex items-center justify-between gap-5 border-b border-border bg-white px-8">
+        <header className="topbar flex items-center justify-between gap-5 border-b border-border bg-white px-8 py-3">
+          {/* Page title */}
           <div className="breadcrumbs flex items-center gap-2.5 text-[10px] font-medium tracking-wide text-muted-foreground">
-            <span>Workspace</span>
+            <span>CodeRabbit</span>
 
             <span className="text-border">/</span>
 
             <strong className="font-semibold text-foreground">
-              {pageTitles[role]}
+              {pageTitle}
             </strong>
           </div>
 
-          <div className="topbar-actions flex items-center gap-4">
-            <div className="relative hidden h-[34px] w-[218px] items-center gap-2 rounded-md border border-border bg-transparent px-2.5 text-muted-foreground md:flex">
-              <Search size={16} className="shrink-0" />
+          {/* User Profile — no button or dropdown */}
+          <div
+            className="flex items-center gap-3 rounded-xl px-3 py-2 shadow-sm ring-1 ring-black/5 transition-shadow duration-200 hover:shadow-md"
+            aria-label={`Signed in as ${userName}, ${role}`}
+          >
+            <Avatar className="h-10 w-10 border border-white shadow-sm">
+              <AvatarFallback className="bg-gradient-to-br from-indigo-100 to-violet-200 text-xs font-bold text-indigo-700">
+                {userInitials}
+              </AvatarFallback>
+            </Avatar>
 
-              <Input
-                className="h-full w-full border-0 bg-transparent p-0 text-[10px] text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
-                placeholder="Search anything..."
-                aria-label="Search projects"
-              />
+            <div className="flex min-w-0 flex-col gap-1">
+              <span className="max-w-[160px] truncate text-xs font-semibold leading-tight text-foreground">
+                {userName}
+              </span>
 
-              <kbd className="min-w-[31px] rounded border border-border bg-[#fafafa] px-1 py-0.5 text-center text-[8px] text-muted-foreground">
-                ⌘K
-              </kbd>
+              <span className="w-fit rounded-full bg-indigo-50 px-2 py-0.5 text-[9px] font-medium capitalize text-indigo-600">
+                {role}
+              </span>
             </div>
-
-            <Button
-              variant="ghost"
-              size="icon"
-              className="relative h-[31px] w-[31px] rounded-md text-muted-foreground hover:bg-[#f5f5f6] hover:text-foreground"
-              aria-label="Notifications"
-            >
-              <Bell size={18} />
-
-              <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full border border-white bg-[var(--orange)]" />
-            </Button>
-
-            <Separator
-              orientation="vertical"
-              className="h-[25px] bg-border"
-            />
-
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                className="flex cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent p-1 text-left outline-none transition-colors hover:bg-[#f5f5f6] focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                <Avatar className="h-[31px] w-[31px] rounded-full text-[9px] font-bold">
-                  <AvatarFallback className="bg-[#e7ecff] text-[#586cbe]">
-                    {userInitials}
-                  </AvatarFallback>
-                </Avatar>
-
-                <span className="flex flex-col">
-                  <span className="text-[10px] font-semibold leading-none text-foreground">
-                    {userName}
-                  </span>
-
-                  <span className="mt-0.5 text-[9px] font-normal capitalize text-muted-foreground">
-                    {role}
-                  </span>
-                </span>
-
-                <ChevronDown
-                  size={15}
-                  className="text-muted-foreground"
-                />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="w-56 border-border bg-white"
-              >
-                <DropdownMenuLabel className="text-[10px] text-muted-foreground">
-                  My Account
-                </DropdownMenuLabel>
-
-                <DropdownMenuSeparator className="bg-border" />
-
-                <DropdownMenuItem
-                  disabled
-                  className="text-[10px]"
-                >
-                  Profile Settings
-                </DropdownMenuItem>
-
-                <DropdownMenuSeparator className="bg-border" />
-
-                <DropdownMenuItem
-                  onSelect={() => void handleSignOut()}
-                  disabled={isLoggingOut}
-                  className="cursor-pointer text-[10px] text-red-500 focus:bg-red-50 focus:text-red-600"
-                >
-                  {isLoggingOut ? (
-                    <>
-                      <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-                      Signing out...
-                    </>
-                  ) : (
-                    "Sign out"
-                  )}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
         </header>
 
+        {/* Page Content */}
         <main className="page-content mx-auto w-full max-w-[1400px] px-8 py-7">
           {children}
         </main>
