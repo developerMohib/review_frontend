@@ -25,17 +25,16 @@ const studentNavigation = [
   { href: "/dashboard/student/submission", label: "My submission", icon: FilePlus2 },
 ];
 
-// ✅ ১. Props ইন্টারফেস সংজ্ঞায়িত করা (Best Practice)
 interface SidebarProps {
   role: UserRole;
   onSignOut: () => void;
-  user?: UserData | null; // ভবিষ্যতে নাম বা ইমেইল দেখানোর জন্য অপশনাল রাখা হলো
+  user?: UserData | null;
 }
 
 export default function Sidebar({ role, onSignOut }: SidebarProps) {
   const pathname = usePathname();
 
-  // ✅ ২. "STUNDENT" টাইপো ঠিক করে "student" (lowercase) করা হয়েছে, যা আপনার UserRole টাইপের সাথে ম্যাচ করে
+  
   const navigation = role === "student" ? studentNavigation : mentorNavigation;
   const home = role === "student" ? "/dashboard/student" : "/dashboard";
 

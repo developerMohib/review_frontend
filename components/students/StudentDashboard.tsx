@@ -3,8 +3,6 @@ import {
   ArrowRight,
   ArrowUpRight,
   BookOpenCheck,
-  Clock3,
-  FileCheck2,
   Plus,
   Sparkles,
 } from "lucide-react";
@@ -15,8 +13,7 @@ interface StudentDashboardProps {
 }
 
 export default function StudentDashboard({ user }: StudentDashboardProps) {
-  // ✅ ডায়নামিক ইউজার নেম
-  const userName = user.name || "Student";
+    const userName = user.name || "Student";
 
   return (
     <div className="dashboard-page student-dashboard">
@@ -25,7 +22,6 @@ export default function StudentDashboard({ user }: StudentDashboardProps) {
           <div className="eyebrow">
             <span className="eyebrow-dot" /> YOUR PROJECT WORKSPACE
           </div>
-          {/* ✅ হার্ডকোডেড "Alex" এর বদলে ডায়নামিক নাম */}
           <h1>
             Welcome back, {userName} <span className="wave">✦</span>
           </h1>
@@ -38,39 +34,6 @@ export default function StudentDashboard({ user }: StudentDashboardProps) {
           <Plus size={17} /> Submit a project
         </Link>
       </div>
-
-      <section className="student-stats">
-        <article className="student-stat-card">
-          <span className="student-stat-icon warm">
-            <FileCheck2 size={18} />
-          </span>
-          <div>
-            <span>Projects submitted</span>
-            <strong>0</strong>
-            <small>Your ideas are taking shape</small>
-          </div>
-        </article>
-        <article className="student-stat-card">
-          <span className="student-stat-icon gold">
-            <Clock3 size={18} />
-          </span>
-          <div>
-            <span>In review</span>
-            <strong>0</strong>
-            <small>Usually reviewed in 2–3 days</small>
-          </div>
-        </article>
-        <article className="student-stat-card">
-          <span className="student-stat-icon mint">
-            <BookOpenCheck size={18} />
-          </span>
-          <div>
-            <span>Reviews received</span>
-            <strong>0</strong>
-            <small>Feedback helps you grow</small>
-          </div>
-        </article>
-      </section>
 
       <section className="student-dashboard-grid">
         <article className="student-project-card">
