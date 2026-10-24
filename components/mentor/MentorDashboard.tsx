@@ -39,14 +39,13 @@ interface SubmissionStats {
 }
 
 export default function ReviewDashboard() {
-  const [stats, setStats] = useState<SubmissionStats>({ total: 0, pending: 0, approved: 0, rejected: 0 });
+  const stats: SubmissionStats = { total: 0, pending: 0, approved: 0, rejected: 0 };
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
   
   const [statusFilter, setStatusFilter] = useState<FilterStatus>("ALL");
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const limit = 10;
+  const totalPages = 1;
 
   useEffect(() => {
     const load = async () => {
@@ -62,54 +61,55 @@ export default function ReviewDashboard() {
 
     load();
   }, [setLoading, setSubmissions]);
-  if (loading) return <p>Loading...</p>;
-console.log('se',submissions)
-  const handleStatusUpdate = async (submissionId: string, newStatus: "APPROVED" | "REJECTED") => {
-    try {
-      // await updateSubmissionStatusRequest(submissionId, newStatus);
-      
-      // // সাকসেসফুল হলে বর্তমান ডেটা রিফেচ করুন
-      // const response = await getMentorSubmissionsRequest({
-      //   status: statusFilter === "ALL" ? undefined : statusFilter,
-      //   page: currentPage,
-      //   limit: limit,
-      // });
-      // setSubmissions(response.submissions);
-      // setStats(response.stats);
-    } catch (error) {
-      console.error("Failed to update status:", error);
-      alert("Failed to update submission status.");
-    }
+
+  const handleStatusUpdate = async (
+    submissionId: string,
+    newStatus: "APPROVED" | "REJECTED",
+  ): Promise<void> => {
+    void submissionId;
+    void newStatus;
   };
 
   if (loading && submissions.length === 0) {
     return (
-      <div className="flex min-h-[400px] items-center justify-center">
+      <div className="dashboard-loading" role="status">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <p>Loading project reviews...</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 p-6">
-      {/* ১. Aggregated Statistics Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="dashboard-page mentor-review-page">
+      <div className="page-heading">
+        <div>
+          <div className="eyebrow">
+            <span className="eyebrow-dot" /> MENTOR WORKSPACE
+          </div>
+          <h1>Review projects</h1>
+          <p>Explore student work and help each project move forward.</p>
+        </div>
+      </div>
+
+      <div className="review-stats">
         <StatCard title="Total Submissions" value={stats.total} indicatorColor="text-blue-600" />
         <StatCard title="Pending Review" value={stats.pending} indicatorColor="text-amber-600" />
         <StatCard title="Approved" value={stats.approved} indicatorColor="text-green-600" />
         <StatCard title="Rejected" value={stats.rejected} indicatorColor="text-red-600" />
       </div>
 
-      {/* ২. Filter & Controls */}
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-        <h2 className="text-2xl font-semibold tracking-tight">Project Reviews</h2>
+      <div className="review-controls">
+        <div>
+          <h2>Review queue</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Browse submissions and their current status.</p>
+        </div>
         <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Filter by status:</span>
+          <span className="text-sm text-muted-foreground">Filter by status</span>
           <Select 
             value={statusFilter} 
             onValueChange={(val) => {
               setStatusFilter(val as FilterStatus);
-              setCurrentPage(1); // ফিল্টার বদলালে প্রথম পেজে রিসেট
+              setCurrentPage(1);
             }}
           >
             <SelectTrigger className="w-[180px]">
@@ -125,8 +125,7 @@ console.log('se',submissions)
         </div>
       </div>
 
-      {/* ৩. Paginated Data Table */}
-      <div className="rounded-md border">
+      <div className="review-table-wrap">
         <Table>
           <TableHeader>
             <TableRow>
@@ -138,7 +137,6 @@ console.log('se',submissions)
           </TableHeader>
           <TableBody>
             {loading ? (
-              // লোডিং অবস্থায় Skeleton দেখানো (Best Practice)
               <TableRow>
                 <TableCell colSpan={4} className="h-24 text-center">
                   <Loader2 className="mx-auto h-6 w-6 animate-spin" />
@@ -156,11 +154,11 @@ console.log('se',submissions)
                   <TableCell className="font-medium">
                     <div className="flex flex-col gap-1">
                       <span>{sub.projectName}</span>
-                      <a 
+                      <a
                         href={sub.repoUrl} 
                         target="_blank" 
                         rel="noopener noreferrer" 
-                        className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline"
+                        className="inline-flex items-center gap-1 text-xs text-(--orange-dark) hover:underline"
                       >
                         View Repo <ExternalLink className="h-3 w-3" />
                       </a>
@@ -171,7 +169,7 @@ console.log('se',submissions)
                     <StatusBadge status={sub.status} />
                   </TableCell>
                   <TableCell className="text-right">
-                    {sub.status === "PENDING" ? (
+                    {sub.status === "pending" ? (
                       <div className="flex justify-end gap-2">
                         <Button 
                           size="sm" 
@@ -200,7 +198,6 @@ console.log('se',submissions)
         </Table>
       </div>
 
-      {/* ৪. Pagination Controls */}
       <div className="flex items-center justify-between px-2">
         <div className="text-sm text-muted-foreground">
           Page <span className="font-medium">{currentPage}</span> of <span className="font-medium">{totalPages}</span>
@@ -232,28 +229,28 @@ console.log('se',submissions)
 
 function StatCard({ title, value, indicatorColor }: { title: string; value: number; indicatorColor: string }) {
   return (
-    <Card>
+    <Card className="review-stat-card">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">
           {title}
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className={`text-2xl font-bold ${indicatorColor}`}>{value}</div>
+        <div className={`review-stat-value ${indicatorColor}`}>{value}</div>
       </CardContent>
     </Card>
   );
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-    PENDING: "secondary", // Amber/Yellowish in Shadcn
-    APPROVED: "default",  // Greenish/Primary
-    REJECTED: "destructive", // Red
+  const statusClasses: Record<string, string> = {
+    PENDING: "status-pending",
+    APPROVED: "status-approved",
+    REJECTED: "status-changes",
   };
   
   return (
-    <Badge variant={variants[status] || "outline"} className="capitalize">
+    <Badge variant="outline" className={`status-badge ${statusClasses[status] || ""} capitalize`}>
       {status.toLowerCase()}
     </Badge>
   );

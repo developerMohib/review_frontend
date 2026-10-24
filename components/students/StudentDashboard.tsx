@@ -89,7 +89,7 @@ export default function StudentDashboard({ user }: StudentDashboardProps) {
           </h2>
           <p>
             Your next project could be the one that changes everything. Start
-            when you re ready.
+            when you’re ready.
           </p>
           <Link href="/dashboard/student/submit">
             Share another idea <ArrowUpRight size={15} />

@@ -15,27 +15,31 @@
 }
 
 :root {
-  --background: #f7f8fa;
+  --background: #f6f7f9;
   --foreground: #202124;
-  --muted: #8b9099;
-  --border: #e9eaed;
+  --muted: #767b84;
+  --border: #e7e9ed;
   --orange: #ff5b35;
   --orange-dark: #e84a28;
   --ink: #191a1c;
-  --radius: 0.65rem;
+  --radius: 0.75rem;
 }
 
 * { box-sizing: border-box; }
-html { min-height: 100%; font-family: Arial, Helvetica, sans-serif; }
+html { min-height: 100%; font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif; }
 body { min-height: 100vh; margin: 0; background: var(--background); color: var(--foreground); }
 button, input, textarea, select { font: inherit; }
 button { cursor: pointer; }
 a { color: inherit; text-decoration: none; }
+button:disabled { cursor: not-allowed; }
+:focus-visible { outline: 3px solid #ff5b3555; outline-offset: 2px; }
 
-.auth-page { min-height: 100vh; background: #fff; }
-.auth-panel { min-height: 100vh; padding: 38px clamp(38px, 7vw, 104px) 26px; }
+.auth-page { min-height: 100vh; display: grid; grid-template-columns: minmax(440px, .92fr) minmax(480px, 1.08fr); background: #fff; }
+.auth-panel { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 38px clamp(38px, 7vw, 104px) 26px; }
 .brand-link { display: inline-flex; width: fit-content; align-items: center; }
 .brand-link img { display: block; width: 226px; height: auto; object-fit: contain; }
+.auth-panel > .brand-link { margin-bottom: 28px; }
+.auth-card { width: 100%; max-width: 440px; margin: 0 auto; border-radius: 14px; box-shadow: 0 18px 55px #2021240a; }
 .auth-form-wrap { width: 100%; max-width: 396px; margin: 38px auto 54px; }
 .eyebrow { display: flex; gap: 8px; align-items: center; color: #9a9da3; font-size: 10px; font-weight: 700; letter-spacing: 1.25px; }
 .eyebrow-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--orange); }
@@ -91,9 +95,9 @@ a { color: inherit; text-decoration: none; }
 .art-footnote { display: flex; align-items: center; gap: 8px; margin-top: 24px; color: #747276; font-size: 8px; font-weight: 700; letter-spacing: 1.2px; }
 .art-footnote span { width: 17px; height: 1px; background: #ff7452; }
 
-.signup-page { min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 38px 24px 25px; background: radial-gradient(ellipse at top, #fff 10%, #f7f8fa 70%); }
-.signup-page > .brand-link { align-self: flex-start; }
-.signup-card { width: min(100%, 440px); margin: auto; padding: 40px; border: 1px solid #eeeff1; border-radius: 12px; background: #fff; box-shadow: 0 12px 45px #20212408; }
+.signup-page { background: radial-gradient(ellipse at top, #fff 10%, #f7f8fa 70%); }
+.signup-panel { padding-top: 32px; padding-bottom: 25px; }
+.signup-card { width: min(100%, 440px); margin: auto; padding: 40px; border: 1px solid #eeeff1; border-radius: 14px; background: #fff; box-shadow: 0 12px 45px #20212408; }
 .signup-card .auth-form { margin-top: 24px; }
 .signup-card .auth-form label:not(:first-child) { margin-top: 5px; }
 .signup-card .auth-switch { margin-bottom: 0; }
@@ -342,12 +346,101 @@ a { color: inherit; text-decoration: none; }
 .student-encouragement p { z-index: 1; margin: 0 0 17px; color: #858890; font-size: 10px; line-height: 1.65; }
 .student-encouragement > a { z-index: 1; display: flex; align-items: center; gap: 6px; margin-top: auto; color: #e95837; font-size: 9px; font-weight: 650; }
 
+.auth-art { background: radial-gradient(ellipse at 80% 15%, #ff5b3520, transparent 42%), #171719; }
+.auth-art::before { opacity: .7; }
+.art-content h2 { font-size: clamp(42px, 5vw, 62px); }
+.review-preview { border-radius: 16px; }
+.preview-approved { white-space: nowrap; }
+.auth-card .auth-form { gap: 16px; }
+.auth-card .auth-form input { min-height: 46px; border-radius: 9px; font-size: 14px; }
+.auth-card .auth-submit { min-height: 48px; border-radius: 9px; font-size: 14px; }
+.auth-card .auth-form label { font-size: 13px; }
+.auth-card .auth-intro { font-size: 14px; }
+.signup-card { padding: 38px; }
+.signup-card .auth-form { gap: 16px; }
+.signup-card .auth-form input { min-height: 46px; border-radius: 9px; font-size: 14px; }
+.signup-card .auth-submit { min-height: 48px; border-radius: 9px; }
+
+.dashboard-sidebar { width: 260px; padding: 26px 17px 18px; }
+.dashboard-content { width: calc(100% - 260px); margin-left: 260px; }
+.dashboard-brand { margin-bottom: 30px; }
+.workspace-switcher { min-height: 58px; border-radius: 10px; }
+.sidebar-label { margin-top: 32px; }
+.sidebar-link { min-height: 44px; border-radius: 9px; font-size: 13px; }
+.topbar { position: sticky; top: 0; z-index: 4; min-height: 68px; padding: 0 38px; background: #ffffffed; backdrop-filter: blur(14px); }
+.breadcrumbs { font-size: 12px; }
+.topbar-actions { gap: 12px; }
+.page-content { padding: 36px 38px 44px; }
+.dashboard-page { gap: 26px; }
+.page-heading h1 { font-size: clamp(26px, 2.3vw, 32px); letter-spacing: -1px; }
+.page-heading > div > p { font-size: 14px; line-height: 1.6; }
+.eyebrow { font-size: 10px; }
+.heading-button { min-height: 42px; border-radius: 9px; font-size: 13px; }
+.stat-card, .chart-card, .review-card, .table-card,
+.student-stat-card, .student-project-card, .student-encouragement,
+.submission-form-card, .submission-detail-card, .aside-tip-card, .reviewer-card {
+  border-color: #e8eaee;
+  border-radius: 13px;
+  box-shadow: 0 8px 24px #20212405;
+}
+.stat-card { padding: 18px; }
+.stat-label, .card-heading p, .table-card-heading p { font-size: 12px; }
+.stat-value { font-size: 28px; }
+.chart-card, .review-card { padding: 22px; }
+.card-heading h2, .table-card-heading h2 { font-size: 15px; }
+.table-card-heading { padding: 20px 22px 16px; }
+.table-toolbar { padding: 0 22px; }
+.table-tab { min-height: 44px; font-size: 12px; }
+.submission-table th { height: 42px; font-size: 10px; }
+.submission-table td { height: 64px; font-size: 12px; }
+.project-cell strong { font-size: 12px; }
+.project-cell small, .project-avatar, .category-chip, .status-badge { font-size: 10px; }
+.status-badge::before { width: 6px; height: 6px; border-radius: 50%; background: currentColor; content: ""; }
+.status-badge.status-pending { border-color: #f2dfc2; }
+.status-badge.status-approved { border-color: #d4eadc; }
+.status-badge.status-changes { border-color: #f2d9d3; }
+.student-stat-card { padding: 18px; }
+.student-stat-card > div > span, .student-stat-card > div > small { font-size: 11px; }
+.student-stat-card > div > strong { font-size: 26px; }
+.student-project-card { padding: 22px; }
+.student-project-copy h3 { font-size: 14px; }
+.student-project-copy p { font-size: 12px; }
+.student-review-note { font-size: 12px; }
+.student-encouragement { padding: 23px; }
+.student-encouragement h2 { font-size: 26px; }
+.student-encouragement p { font-size: 13px; }
+.submission-form-card, .submission-detail-card { padding: 26px; }
+.form-section-title h2 { font-size: 16px; }
+.form-section-title p, .field-caption { font-size: 12px; }
+.form-field { gap: 8px; margin-bottom: 19px; }
+.form-field label { font-size: 13px; }
+.form-field input, .form-field select { min-height: 46px; border-radius: 9px; font-size: 13px; }
+.form-field textarea { min-height: 120px; border-radius: 9px; font-size: 13px; }
+.form-actions button { min-height: 42px; font-size: 12px; }
+.aside-tip-card h3, .reviewer-card h3 { font-size: 17px; }
+.aside-tip-card > p, .reviewer-card > p, .submission-info p { font-size: 12px; }
+.tip-check, .timeline-step strong, .timeline-step small { font-size: 11px; }
+.submissions-page .submission-table-wrap,
+.review-table-wrap { width: 100%; overflow-x: auto; border: 1px solid #e8eaee; border-radius: 13px; background: white; }
+.review-table-wrap table,
+.submissions-page table { min-width: 650px; }
+.review-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.review-stat-card { border: 1px solid var(--border); border-radius: 13px; background: #fff; box-shadow: 0 8px 24px #20212405; }
+.review-stat-card [data-slot="card-title"] { color: #777b84; font-size: 12px; }
+.review-stat-card .review-stat-value { font-size: 27px; font-weight: 700; }
+.review-controls { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.review-controls h2 { margin: 0; font-size: 20px; letter-spacing: -.4px; }
+.submissions-page .submission-heading-meta { color: #7c8088; font-size: 13px; }
+.dashboard-loading { min-height: 320px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; color: #7c8088; }
+.dashboard-loading svg { color: var(--orange); }
+.dashboard-loading p { margin: 0; font-size: 14px; }
+
 @media (min-width: 1600px) {
   .page-content { padding-right: 48px; padding-left: 48px; }
 }
 @media (max-width: 1050px) {
-  .auth-page { grid-template-columns: minmax(390px, .9fr) minmax(400px, 1.1fr); }
-  .auth-panel { padding-right: 45px; padding-left: 45px; }
+  .auth-page { grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr); }
+  .auth-panel { padding-right: clamp(28px, 5vw, 52px); padding-left: clamp(28px, 5vw, 52px); }
   .dashboard-sidebar { width: 218px; }
   .dashboard-content { width: calc(100% - 218px); margin-left: 218px; }
   .page-content { padding-right: 22px; padding-left: 22px; }
@@ -361,8 +454,9 @@ a { color: inherit; text-decoration: none; }
   .auth-art { display: none; }
   .auth-form-wrap { max-width: 430px; margin: 48px auto; }
   .auth-footer { font-size: 9px; }
-  .signup-page { padding: 25px 17px 18px; }
-  .signup-card { margin: 38px auto; padding: 29px 24px; }
+  .signup-page { padding: 0; }
+  .signup-panel { min-height: 100vh; padding: 25px 24px 22px; }
+  .signup-card { margin: auto; padding: 29px 24px; }
   .dashboard-sidebar { width: 62px; align-items: center; padding: 18px 7px 12px; }
   .dashboard-brand { width: 36px; height: 35px; overflow: hidden; margin: 1px 0 23px; }
   .dashboard-brand img { width: 178px; max-width: none; }
@@ -384,6 +478,8 @@ a { color: inherit; text-decoration: none; }
   .review-card { min-height: 205px; }
   .submission-layout, .my-submission-layout { grid-template-columns: 1fr; }
   .student-dashboard-grid { grid-template-columns: 1fr; }
+  .review-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .review-controls { align-items: flex-start; flex-direction: column; }
   .student-encouragement { min-height: 220px; }
   .submission-aside { display: grid; grid-template-columns: 1fr 1fr; }
   .student-stats { gap: 8px; }

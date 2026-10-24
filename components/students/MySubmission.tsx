@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getMySubmissionsRequest } from "@/lib/api/submission";
-import { Submission } from "@/lib/validators/submission.validation";
+import { FileText, Loader2 } from "lucide-react";
+
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -11,8 +12,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Loader2, FileText } from "lucide-react";
+import { getMySubmissionsRequest } from "@/lib/api/submission";
+import { Submission } from "@/lib/validators/submission.validation";
 
 export default function MySubmissions() {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
@@ -22,7 +23,6 @@ export default function MySubmissions() {
     const load = async () => {
       try {
         const response = await getMySubmissionsRequest();
-        // আপনার API রেসপন্স স্ট্রাকচার অনুযায়ী এটি অ্যাডজাস্ট করুন
         setSubmissions(response.submissions || []);
       } catch (error) {
         console.error("Failed to fetch submissions:", error);
@@ -34,72 +34,80 @@ export default function MySubmissions() {
     load();
   }, []);
 
-  // স্ট্যাটাস অনুযায়ী Badge-এর রং নির্ধারণ করার হেল্পার ফাংশন
-  const getStatusVariant = (status: string) => {
+  const getStatusClass = (status: string) => {
     switch (status.toUpperCase()) {
       case "APPROVED":
-        return "default"; // সাধারণত সবুজ বা প্রাইমারি কালার
+        return "status-approved";
       case "REJECTED":
-        return "destructive"; // লাল কালার
+        return "status-changes";
       case "PENDING":
-        return "secondary"; // হলুদ/ধূসর কালার
+        return "status-pending";
       default:
-        return "outline";
+        return "";
     }
   };
 
   if (loading) {
     return (
-      <div className="flex min-h-[300px] flex-col items-center justify-center gap-3 text-muted-foreground">
+      <div className="dashboard-loading" role="status">
         <Loader2 className="h-8 w-8 animate-spin" />
-        <p className="text-sm">Loading your submissions...</p>
+        <p>Loading your submissions...</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold tracking-tight">My Submissions</h2>
-        <Badge variant="outline" className="font-normal">
-          Total: {submissions.length}
+    <div className="dashboard-page submissions-page">
+      <div className="page-heading">
+        <div>
+          <div className="eyebrow">
+            <span className="eyebrow-dot" /> STUDENT WORKSPACE
+          </div>
+          <h1>My submissions</h1>
+          <p>Keep track of the projects you have shared for review.</p>
+        </div>
+        <Badge variant="outline" className="submission-heading-meta">
+          {submissions.length} {submissions.length === 1 ? "project" : "projects"}
         </Badge>
       </div>
 
-      <div className="rounded-md border">
+      <div className="submission-table-wrap">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[250px]">Project Name</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead className="w-[150px] text-center">Category</TableHead>
-              <TableHead className="w-[150px] text-center">Status</TableHead>
+              <TableHead className="min-w-[200px]">Project</TableHead>
+              <TableHead className="min-w-[260px]">Description</TableHead>
+              <TableHead className="min-w-[140px]">Category</TableHead>
+              <TableHead className="min-w-[130px]">Status</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {submissions.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={3} className="h-32 text-center">
+                <TableCell colSpan={4} className="h-40 text-center">
                   <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
-                    <FileText className="h-8 w-8 opacity-50" />
-                    <p>No submissions found. Start by submitting a new project!</p>
+                    <FileText className="h-9 w-9 opacity-50" />
+                    <p>No submissions yet. Your shared projects will appear here.</p>
                   </div>
                 </TableCell>
               </TableRow>
             ) : (
               submissions.map((submission) => (
-                <TableRow key={submission.id} className="hover:bg-muted/50">
-                  <TableCell className="font-medium">
+                <TableRow key={submission.id}>
+                  <TableCell className="font-semibold text-foreground">
                     {submission.projectName}
                   </TableCell>
-                  <TableCell className="text-muted-foreground max-w-md truncate">
+                  <TableCell className="max-w-md truncate text-muted-foreground">
                     {submission.description}
                   </TableCell>
-                  <TableCell className="text-muted-foreground max-w-md truncate">
-                    {submission.category}
+                  <TableCell>
+                    <span className="category-chip">{submission.category}</span>
                   </TableCell>
-                  <TableCell className="text-center">
-                    <Badge variant={getStatusVariant(submission.status)} className="capitalize">
+                  <TableCell>
+                    <Badge
+                      variant="outline"
+                      className={`status-badge ${getStatusClass(submission.status)}`}
+                    >
                       {submission.status.toLowerCase()}
                     </Badge>
                   </TableCell>

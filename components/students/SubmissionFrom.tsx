@@ -3,8 +3,8 @@
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import { ArrowLeft, ArrowRight, Code2, ExternalLink, Info, Sparkles, Loader2 } from "lucide-react";
-import { toast } from "sonner"; // আপনার প্রজেক্টে toast থাকলে
-import { api } from "@/lib/axios"; // আপনার কনফিগার করা axios instance
+import { toast } from "sonner";
+import { api } from "@/lib/axios";
 import { getErrorMessage } from "@/lib/api/auth";
 import { submissionSchema } from "@/lib/validators/submission.validation";
 
@@ -19,12 +19,11 @@ export default function SubmissionForm() {
     try {
       const formData = new FormData(event.currentTarget);
 
-      // শুধুমাত্র ফর্মের ডাটাগুলোই পাঠানো হবে। userId বা status এখানে নেই।
       const payload = {
         projectName: String(formData.get("project") ?? "").trim(),
         category: String(formData.get("category") ?? "Web app"),
         repoUrl: String(formData.get("repository") ?? "").trim(),
-        liveUrl: String(formData.get("liveUrl") ?? "").trim(), // Optional handle
+        liveUrl: String(formData.get("liveUrl") ?? "").trim(),
         description: String(formData.get("description") ?? "").trim(),
       };
 
@@ -35,16 +34,12 @@ export default function SubmissionForm() {
 
         toast.error(firstError || "Please check the form fields");
 
-        getErrorMessage(parsed.error);
-        // সব error দেখতে চাইলে:
-        console.log(parsed.error.flatten().fieldErrors);
-
         return;
       }
 
       const response = await api.post("/submissions", parsed.data);
       if (response.data.data.success) {
-        toast.success(response.data.data.message || "Project submitted successfully! custom");
+        toast.success(response.data.data.message || "Project submitted successfully!");
         router.push("/dashboard/student/submission");
         router.refresh();
       }
@@ -62,7 +57,7 @@ export default function SubmissionForm() {
       <div className="page-heading">
         <div>
           <div className="eyebrow"><span className="eyebrow-dot" /> STUDENT WORKSPACE</div>
-          <h1>Share what you ve built</h1>
+          <h1>Share what you’ve built</h1>
           <p>Submit your project and get thoughtful feedback from a mentor.</p>
         </div>
       </div>
@@ -139,7 +134,7 @@ export default function SubmissionForm() {
           </div>
           <div className="submission-info">
             <Info size={17} />
-            <p>You can submit one project at a time. Once its reviewed, you can share your next one.</p>
+            <p>You can submit one project at a time. Once it’s reviewed, you can share your next one.</p>
           </div>
         </aside>
       </div>

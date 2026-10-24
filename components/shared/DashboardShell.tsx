@@ -1,9 +1,9 @@
 "use client";
 
-import { redirect, useRouter } from "next/navigation";
+import { redirect, usePathname, useRouter } from "next/navigation";
 import { type ReactNode, useRef, useState } from "react";
 import { isAxiosError } from "axios";
-import { Bell, ChevronDown, Search, Loader2 } from "lucide-react";
+import { ChevronDown, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -16,9 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
 
 import Sidebar from "@/components/shared/Sidebar";
 import { api } from "@/lib/axios";
@@ -34,12 +32,6 @@ interface CurrentUserResponse {
 }
 
 
-const pageTitles: Record<UserRole, string> = {
-  student: "Student Dashboard",
-  mentor: "Review projects",
-  admin: "Review projects",
-};
-
 function isUnauthenticated(error: unknown): boolean {
   return isAxiosError(error) && error.response?.status === 401;
 }
@@ -54,6 +46,7 @@ export default function DashboardShell({
   children,
 }: DashboardShellProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const queryClient = useQueryClient();
 
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -158,57 +151,35 @@ export default function DashboardShell({
     .join("")
     .toUpperCase()
     .slice(0, 2);
+  const pageTitle = pathname.startsWith("/dashboard/student/submit")
+    ? "Submit a project"
+    : pathname.startsWith("/dashboard/student/submission")
+      ? "My submissions"
+      : pathname.startsWith("/dashboard/student")
+        ? "Overview"
+        : pathname.startsWith("/dashboard/mentor")
+          ? "Review projects"
+          : role === "student"
+            ? "Overview"
+            : "Dashboard";
 
   return (
     <div className="dashboard-shell">
-      <Sidebar
-        role={role}
-        onSignOut={handleSignOut}
-      />
+      <Sidebar role={role} />
 
       <div className="dashboard-content">
-        <header className="topbar flex items-center justify-between gap-5 border-b border-border bg-white px-8">
+        <header className="topbar">
           <div className="breadcrumbs flex items-center gap-2.5 text-[10px] font-medium tracking-wide text-muted-foreground">
-            <span>Workspace</span>
+            <span>CodeRabbit</span>
 
             <span className="text-border">/</span>
 
             <strong className="font-semibold text-foreground">
-              {pageTitles[role]}
+              {pageTitle}
             </strong>
           </div>
 
           <div className="topbar-actions flex items-center gap-4">
-            <div className="relative hidden h-[34px] w-[218px] items-center gap-2 rounded-md border border-border bg-transparent px-2.5 text-muted-foreground md:flex">
-              <Search size={16} className="shrink-0" />
-
-              <Input
-                className="h-full w-full border-0 bg-transparent p-0 text-[10px] text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
-                placeholder="Search anything..."
-                aria-label="Search projects"
-              />
-
-              <kbd className="min-w-[31px] rounded border border-border bg-[#fafafa] px-1 py-0.5 text-center text-[8px] text-muted-foreground">
-                ⌘K
-              </kbd>
-            </div>
-
-            <Button
-              variant="ghost"
-              size="icon"
-              className="relative h-[31px] w-[31px] rounded-md text-muted-foreground hover:bg-[#f5f5f6] hover:text-foreground"
-              aria-label="Notifications"
-            >
-              <Bell size={18} />
-
-              <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full border border-white bg-[var(--orange)]" />
-            </Button>
-
-            <Separator
-              orientation="vertical"
-              className="h-[25px] bg-border"
-            />
-
             <DropdownMenu>
               <DropdownMenuTrigger
                 className="flex cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent p-1 text-left outline-none transition-colors hover:bg-[#f5f5f6] focus-visible:ring-2 focus-visible:ring-ring"
@@ -245,15 +216,6 @@ export default function DashboardShell({
                 <DropdownMenuSeparator className="bg-border" />
 
                 <DropdownMenuItem
-                  disabled
-                  className="text-[10px]"
-                >
-                  Profile Settings
-                </DropdownMenuItem>
-
-                <DropdownMenuSeparator className="bg-border" />
-
-                <DropdownMenuItem
                   onSelect={() => void handleSignOut()}
                   disabled={isLoggingOut}
                   className="cursor-pointer text-[10px] text-red-500 focus:bg-red-50 focus:text-red-600"
@@ -272,7 +234,7 @@ export default function DashboardShell({
           </div>
         </header>
 
-        <main className="page-content mx-auto w-full max-w-[1400px] px-8 py-7">
+        <main className="page-content">
           {children}
         </main>
       </div>

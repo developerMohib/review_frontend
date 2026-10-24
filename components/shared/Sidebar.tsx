@@ -4,15 +4,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  ChevronDown,
   ClipboardList,
   FilePlus2,
   LayoutDashboard,
-  LogOut,
+  Sparkles,
   Send,
-  Settings2,
 } from "lucide-react";
-import { UserRole, UserData } from "@/types"; // UserData ইম্পোর্ট করা হলো
+import { UserRole } from "@/types";
 
 const mentorNavigation = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
@@ -27,11 +25,9 @@ const studentNavigation = [
 
 interface SidebarProps {
   role: UserRole;
-  onSignOut: () => void;
-  user?: UserData | null;
 }
 
-export default function Sidebar({ role, onSignOut }: SidebarProps) {
+export default function Sidebar({ role }: SidebarProps) {
   const pathname = usePathname();
 
   
@@ -41,16 +37,15 @@ export default function Sidebar({ role, onSignOut }: SidebarProps) {
   return (
     <aside className="dashboard-sidebar">
       <Link href={home} className="dashboard-brand" aria-label="CodeRabbit dashboard">
-        <Image src="/coderabbit-logo.png" alt="CodeRabbit" width={193} height={31} priority />
+        <Image src="/coderabbit-logo.png" alt="CodeRabbit" width={620} height={96} priority />
       </Link>
 
       <div className="workspace-switcher">
         <div className="workspace-mark">CR</div>
         <div className="workspace-copy">
-          <strong>Project workspace</strong>
-          <span>Free plan</span>
+          <strong>Project review</strong>
+          <span>Your workspace</span>
         </div>
-        <ChevronDown size={15} />
       </div>
 
       <div className="sidebar-label">WORKSPACE</div>
@@ -65,10 +60,11 @@ export default function Sidebar({ role, onSignOut }: SidebarProps) {
               key={href} 
               href={href} 
               className={active ? "sidebar-link active" : "sidebar-link"}
+              aria-label={label}
+              title={label}
             >
               <Icon size={18} strokeWidth={1.8} />
               <span>{label}</span>
-              {label === "Review projects" && <span className="nav-count">8</span>}
             </Link>
           );
         })}
@@ -76,8 +72,7 @@ export default function Sidebar({ role, onSignOut }: SidebarProps) {
 
       <div className="sidebar-bottom">
         <div className="sidebar-tip">
-          <div className="tip-icon"><Settings2 size={16} /></div>
-          {/* ✅ ৩. টাইপের সাথে ম্যাচ করার জন্য "student" (lowercase) ব্যবহার করা হয়েছে */}
+          <div className="tip-icon"><Sparkles size={16} /></div>
           <strong>{role === "student" ? "Keep building" : "Thoughtful reviews matter"}</strong>
           <p>
             {role === "student" 
@@ -88,10 +83,6 @@ export default function Sidebar({ role, onSignOut }: SidebarProps) {
             {role === "student" ? "Start a submission" : "Open review queue"} <span>→</span>
           </Link>
         </div>
-        
-        <button type="button" className="sidebar-logout" onClick={onSignOut}>
-          <LogOut size={17} /> Sign out
-        </button>
       </div>
     </aside>
   );
