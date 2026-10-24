@@ -24,6 +24,7 @@ export default function MySubmissions() {
       try {
         const response = await getMySubmissionsRequest();
         setSubmissions(response.submissions || []);
+
       } catch (error) {
         console.error("Failed to fetch submissions:", error);
       } finally {
@@ -36,11 +37,11 @@ export default function MySubmissions() {
 
   const getStatusClass = (status: string) => {
     switch (status.toUpperCase()) {
-      case "APPROVED":
+      case "approved":
         return "status-approved";
-      case "REJECTED":
+      case "rejected":
         return "status-changes";
-      case "PENDING":
+      case "pending":
         return "status-pending";
       default:
         return "";
