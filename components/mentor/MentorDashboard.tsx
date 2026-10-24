@@ -31,7 +31,7 @@ import {
   SubmissionStats,
   SubmissionStatus,
 } from "@/lib/validators/submission.validation";
-import { getAllSubmissionsRequest } from "@/lib/api/submission";
+import { getAllSubmissionsRequest, updateSubmissionStatusRequest } from "@/lib/api/submission";
 
 export type FilterStatus = "all" | SubmissionStatus;
 
@@ -83,12 +83,29 @@ export default function MentorDashboard() {
   }, [currentPage, statusFilter]);
 
   const handleStatusUpdate = async (
-    submissionId: string,
-    newStatus: "approved" | "rejected"
-  ) => {
-    // TODO: Call your update API here
-    console.log(submissionId, newStatus);
-  };
+  submissionId: string,
+  newStatus: "approved" | "rejected"
+) => {
+  try {
+    setLoading(true);
+
+    await updateSubmissionStatusRequest(submissionId, newStatus);
+
+    const response = await getAllSubmissionsRequest({
+      page: currentPage,
+      limit: 10,
+      status: statusFilter,
+    });
+console.log(response)
+    setSubmissions(response.submissions);
+    setPagination(response.pagination);
+    setStats(response.stats);
+  } catch (error) {
+    console.error("Failed to update submission status:", error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const getRangeStart = () => {
     if (pagination.total === 0) return 0;
