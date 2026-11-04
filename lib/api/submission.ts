@@ -5,6 +5,8 @@ import {
   SubmissionResponse,
 } from "@/lib/validators/submission.validation";
 
+import { api } from "../axios";
+
 export const createSubmissionRequest = async (input: SubmissionInput) => {
   const res = await apiServer.post<SubmissionResponse>("/submissions", input);
 
@@ -53,13 +55,26 @@ export const getAllSubmissionsRequest = async (params?: {
   return res.data.data;
 };
 
+// export const updateSubmissionStatusRequest = async (
+//   submissionId: string,
+//   status: "approved" | "rejected"
+// ) => {
+//   const res = await apiServer.patch(`/submissions/update/${submissionId}`, {
+//     status,
+//   });
+
+//   return res.data;
+// };
+// lib/api/submission.ts
+
 export const updateSubmissionStatusRequest = async (
   submissionId: string,
-  status: "approved" | "rejected"
+  status: "approved" | "rejected",
+  comment: string // নতুন প্যারামিটার
 ) => {
-  const res = await apiServer.patch(`/submissions/update/${submissionId}`, {
+  const { data } = await api.patch(`/submissions/update/${submissionId}`, {
     status,
+    comment, // ব্যাকএন্ডে পাঠানো হচ্ছে
   });
-
-  return res.data;
+  return data;
 };
