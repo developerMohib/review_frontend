@@ -2,10 +2,9 @@
 
 import { redirect, usePathname, useRouter } from "next/navigation";
 import { type ReactNode, useRef, useState } from "react";
-import { isAxiosError } from "axios";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -14,26 +13,16 @@ import {
 } from "@/components/ui/avatar";
 
 import Sidebar from "@/components/shared/Sidebar";
-import { api } from "@/lib/axios";
-import { UserData, UserRole } from "@/types";
+import { PublicAuthError, logoutPublic } from "@/lib/api/auth.public";
+import { usePublicCurrentUserQuery } from "@/lib/hooks/usePublicAuth";
+import { UserRole } from "@/types";
 
 interface DashboardShellProps {
   children: ReactNode;
 }
 
-interface CurrentUserResponse {
-  success: boolean;
-  data: UserData;
-}
-
-function isUnauthenticated(error: unknown): boolean {
-  return isAxiosError(error) && error.response?.status === 401;
-}
-
-async function fetchCurrentUser(): Promise<UserData> {
-  const response = await api.get<CurrentUserResponse>("/auth/me");
-
-  return response.data.data;
+function isPublicAuthUnauthorized(error: unknown): boolean {
+  return error instanceof PublicAuthError && error.status === 401;
 }
 
 export default function DashboardShell({
@@ -47,17 +36,13 @@ export default function DashboardShell({
   const logoutInProgress = useRef(false);
 
   const {
-    data: userData,
-    isLoading,
-    isError,
-    error,
-    refetch,
-    isFetching,
-  } = useQuery({
-    queryKey: ["currentUser"],
-    queryFn: fetchCurrentUser,
-    retry: false,
-  });
+    data: publicUserData,
+    isLoading: isPublicUserLoading,
+    isError: hasPublicUserError,
+    error: publicUserError,
+    refetch: refetchPublicUser,
+    isFetching: isFetchingPublicUser,
+  } = usePublicCurrentUserQuery();
 
   const handleSignOut = async (): Promise<void> => {
     if (logoutInProgress.current) return;
@@ -67,9 +52,9 @@ export default function DashboardShell({
 
     try {
       try {
-        await api.post("/auth/logout");
+        await logoutPublic();
       } catch (error: unknown) {
-        if (!isUnauthenticated(error)) {
+        if (!isPublicAuthUnauthorized(error)) {
           throw error;
         }
       }
@@ -88,32 +73,32 @@ export default function DashboardShell({
     }
   };
 
-  if (isLoading) {
+  if (isPublicUserLoading) {
     return (
       <div
         className="flex min-h-screen items-center justify-center bg-background"
         role="status"
         aria-label="Loading dashboard"
       >
-        <Loader2 className="h-8 w-8 animate-spin text-[var(--orange)]" />
+        <Loader2 className="h-8 w-8 animate-spin text-(--orange)" />
         <span className="sr-only">Loading dashboard...</span>
       </div>
     );
   }
 
-  if (isError && isUnauthenticated(error)) {
+  if (hasPublicUserError && isPublicAuthUnauthorized(publicUserError)) {
     redirect("/login");
   }
 
-  if (isError || !userData) {
+  if (hasPublicUserError || !publicUserData) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background px-6 text-center">
         <p className="text-sm text-muted-foreground">
           We could not load your account. Please try again.
         </p>
 
-        <Button onClick={() => void refetch()} disabled={isFetching}>
-          {isFetching && (
+        <Button onClick={() => void refetchPublicUser()} disabled={isFetchingPublicUser}>
+          {isFetchingPublicUser && (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           )}
           Try again
@@ -122,10 +107,10 @@ export default function DashboardShell({
     );
   }
 
-  const role: UserRole = userData.role;
-  const userName = userData.name.trim() || "User";
+  const publicUserRole: UserRole = publicUserData.role;
+  const publicUserName = publicUserData.name.trim() || "User";
 
-  const userInitials = userName
+  const publicUserInitials = publicUserName
     .split(/\s+/)
     .map((part) => part.charAt(0))
     .join("")
@@ -140,14 +125,14 @@ export default function DashboardShell({
         ? "Overview"
         : pathname.startsWith("/dashboard/mentor")
           ? "Review projects"
-          : role === "student"
+          : publicUserRole === "student"
             ? "Overview"
             : "Dashboard";
 
   return (
     <div className="dashboard-shell">
       <Sidebar
-        role={role}
+        role={publicUserRole}
         onSignOut={() => void handleSignOut()}
         isLoggingOut={isLoggingOut}
       />
@@ -168,28 +153,28 @@ export default function DashboardShell({
           {/* User Profile — no button or dropdown */}
           <div
             className="flex items-center gap-3 rounded-xl px-3 py-2 shadow-sm ring-1 ring-black/5 transition-shadow duration-200 hover:shadow-md"
-            aria-label={`Signed in as ${userName}, ${role}`}
+            aria-label={`Signed in as ${publicUserName}, ${publicUserRole}`}
           >
             <Avatar className="h-10 w-10 border border-white shadow-sm">
-              <AvatarFallback className="bg-gradient-to-br from-indigo-100 to-violet-200 text-xs font-bold text-indigo-700">
-                {userInitials}
+              <AvatarFallback className="bg-linear-to-br from-indigo-100 to-violet-200 text-xs font-bold text-indigo-700">
+                {publicUserInitials}
               </AvatarFallback>
             </Avatar>
 
             <div className="flex min-w-0 flex-col gap-1">
-              <span className="max-w-[160px] truncate text-xs font-semibold leading-tight text-foreground">
-                {userName}
+              <span className="max-w-40 truncate text-xs font-semibold leading-tight text-foreground">
+                {publicUserName}
               </span>
 
               <span className="w-fit rounded-full bg-indigo-50 px-2 py-0.5 text-[9px] font-medium capitalize text-indigo-600">
-                {role}
+                {publicUserRole}
               </span>
             </div>
           </div>
         </header>
 
         {/* Page Content */}
-        <main className="page-content mx-auto w-full max-w-[1400px] px-8 py-7">
+        <main className="page-content mx-auto w-full max-w-350 px-8 py-7">
           {children}
         </main>
       </div>

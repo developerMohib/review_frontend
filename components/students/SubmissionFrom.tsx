@@ -4,8 +4,8 @@ import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import { ArrowLeft, ArrowRight, Code2, ExternalLink, Info, Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { api } from "@/lib/axios";
-import { getErrorMessage } from "@/lib/api/auth";
+import { apiServer } from "@/lib/axios";
+import { getPublicErrorMessage } from "@/lib/api/errors.public";
 import { submissionSchema } from "@/lib/validators/submission.validation";
 
 export default function SubmissionForm() {
@@ -37,15 +37,15 @@ export default function SubmissionForm() {
         return;
       }
 
-      const response = await api.post("/submissions", parsed.data);
-      if (response.data.data.success) {
-        toast.success(response.data.data.message || "Project submitted successfully!");
+      const response = await apiServer.post("/submissions", parsed.data);
+      if (response.data.success) {
+        toast.success(response.data.message || "Project submitted successfully!");
         router.push("/dashboard/student/submission");
         router.refresh();
       }
 
     } catch (error) {
-      const errorMsg = getErrorMessage(error);
+      const errorMsg = getPublicErrorMessage(error);
       toast.error(errorMsg);
     } finally {
       setIsSubmitting(false);
@@ -57,7 +57,7 @@ export default function SubmissionForm() {
       <div className="page-heading">
         <div>
           <div className="eyebrow"><span className="eyebrow-dot" /> STUDENT WORKSPACE</div>
-          <h1>Share what you’ve built</h1>
+          <h1>Share what you ve built</h1>
           <p>Submit your project and get thoughtful feedback from a mentor.</p>
         </div>
       </div>
@@ -134,7 +134,7 @@ export default function SubmissionForm() {
           </div>
           <div className="submission-info">
             <Info size={17} />
-            <p>You can submit one project at a time. Once it’s reviewed, you can share your next one.</p>
+            <p>You can submit one project at a time. Once it s reviewed, you can share your next one.</p>
           </div>
         </aside>
       </div>
