@@ -76,10 +76,10 @@ export default function MySubmissions() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="min-w-[200px]">Project</TableHead>
-              <TableHead className="min-w-[260px]">Description</TableHead>
-              <TableHead className="min-w-[140px]">Category</TableHead>
-              <TableHead className="min-w-[130px]">Status</TableHead>
+              <TableHead className="min-w-50">Project</TableHead>
+              <TableHead className="min-w-65">Description</TableHead>
+              <TableHead className="min-w-35">Category</TableHead>
+              <TableHead className="min-w-32.5">Status</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

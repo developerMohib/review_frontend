@@ -1,40 +1,46 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { api } from "../axios";
-import { UserData } from "@/types";
+import { UserData } from "../../types/index";
 
-/**
- * Server Component এ ইউজার ডেটা ফেচ করার জন্য
- */
-export const getMe = async (): Promise<UserData | null> => {
-  try {
-    const cookieStore = await cookies();
-    
-    const token = cookieStore.get("token")?.value;
+interface CurrentUserResponse {
+  success: boolean;
+  data: UserData;
+  message?: string;
+}
 
-    if (!token) {
-      return null;
-    }
-
-    const { data } = await api.get("/auth/me", {
-      headers: {
-        Cookie: `token=${token}`,
-      },
-    });
-
-    return data?.data || null;
-  } catch (error) {
-    console.error("Failed to fetch user in server:", error);
+export async function getMe(): Promise<UserData | null> {
+  const token = (await cookies()).get("token")?.value;
+  if (!token) {
     return null;
   }
-};
+
+  const apiUrl = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL;
+  if (!apiUrl) {
+    throw new Error("API_URL or NEXT_PUBLIC_API_URL must be configured");
+  }
+
+  const response = await fetch(`${apiUrl}/auth/me`, {
+    headers: { Cookie: `token=${token}` },
+    cache: "no-store",
+  });
+
+  if (response.status === 401) {
+    return null;
+  }
+
+  const data = (await response.json()) as CurrentUserResponse;
+  if (!response.ok) {
+    throw new Error(data.message || "Unable to load current user");
+  }
+
+  return data.data;
+}
 
 /**
- * ইউজার অথেনটিকেটেড কিনা চেক করে, না হলে রিডাইরেক্ট করে
+ * user aunthentication and redirect to login page if not authenticated
  */
 export const requireAuth = async (): Promise<UserData> => {
   const user = await getMe();
-  
   if (!user) {
     redirect("/login");
   }

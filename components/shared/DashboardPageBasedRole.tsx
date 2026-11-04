@@ -2,26 +2,22 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import { getMe } from "@/lib/api/auth";
+import { usePublicCurrentUserQuery } from "@/lib/hooks/usePublicAuth";
 
 export default function DashboardRootPage() {
   const router = useRouter();
 
-  const { data: user, isLoading } = useQuery({
-    queryKey: ["currentUser"],
-    queryFn: getMe,
-    retry: false,
-  });
+  const { data: publicUser, isLoading: isPublicUserLoading } =
+    usePublicCurrentUserQuery();
 
   useEffect(() => {
-    if (!user) return;
+    if (!publicUser) return;
 
-    router.replace(`/dashboard/${user.role}`);
-  }, [user, router]);
+    router.replace(`/dashboard/${publicUser.role}`);
+  }, [publicUser, router]);
 
-  if (isLoading) {
+  if (isPublicUserLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-(--orange)" />
