@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { isAxiosError } from "axios";
 import {
   Card,
   CardContent,
@@ -32,12 +34,14 @@ import {
   SubmissionStatus,
 } from "@/lib/validators/submission.validation";
 import { getAllSubmissionsRequest, updateSubmissionStatusRequest } from "@/lib/api/submission";
+import { getPublicErrorMessage } from "@/lib/api/errors.public";
 
 export type FilterStatus = "all" | SubmissionStatus;
 
 type PageNumber = number | "ellipsis";
 
 export default function MentorDashboard() {
+  const router = useRouter();
   const [stats, setStats] = useState<SubmissionStats>({
     total: 0,
     pending: 0,
@@ -47,6 +51,8 @@ export default function MentorDashboard() {
 
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   const [statusFilter, setStatusFilter] = useState<FilterStatus>("all");
   const [currentPage, setCurrentPage] = useState(1);
@@ -59,8 +65,11 @@ export default function MentorDashboard() {
   });
 
   useEffect(() => {
+    let active = true;
+
     const load = async () => {
       setLoading(true);
+      setLoadError(null);
 
       try {
         const response = await getAllSubmissionsRequest({
@@ -69,18 +78,32 @@ export default function MentorDashboard() {
           status: statusFilter,
         });
 
+        if (!active) return;
         setSubmissions(response.submissions);
         setPagination(response.pagination);
         setStats(response.stats);
       } catch (error) {
-        console.error("Failed to load submissions:", error);
+        if (active) {
+          if (isAxiosError(error) && error.response?.status === 401) {
+            router.replace(
+              `/login?callbackUrl=${encodeURIComponent("/dashboard/mentor")}`,
+            );
+            return;
+          }
+          setLoadError(getPublicErrorMessage(error));
+        }
       } finally {
-        setLoading(false);
+        if (active) {
+          setLoading(false);
+        }
       }
     };
 
     load();
-  }, [currentPage, statusFilter]);
+    return () => {
+      active = false;
+    };
+  }, [currentPage, retryCount, router, statusFilter]);
 
   const handleStatusUpdate = async (
   submissionId: string,
@@ -96,12 +119,18 @@ export default function MentorDashboard() {
       limit: 10,
       status: statusFilter,
     });
-console.log(response)
     setSubmissions(response.submissions);
     setPagination(response.pagination);
     setStats(response.stats);
+    setLoadError(null);
   } catch (error) {
-    console.error("Failed to update submission status:", error);
+    if (isAxiosError(error) && error.response?.status === 401) {
+      router.replace(
+        `/login?callbackUrl=${encodeURIComponent("/dashboard/mentor")}`,
+      );
+      return;
+    }
+    setLoadError(getPublicErrorMessage(error));
   } finally {
     setLoading(false);
   }
@@ -236,6 +265,25 @@ console.log(response)
         </div>
       </div>
 
+      {loadError && (
+        <div
+          className="flex flex-col gap-3 rounded-md border border-destructive/30 bg-destructive/5 p-4 sm:flex-row sm:items-center sm:justify-between"
+          role="alert"
+        >
+          <p className="text-sm text-destructive">
+            Unable to load submissions: {loadError}
+          </p>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setRetryCount((count) => count + 1)}
+            disabled={loading}
+          >
+            Retry
+          </Button>
+        </div>
+      )}
+
       {/* Table */}
       <div className="review-table-wrap border rounded-md">
         <Table>
@@ -253,6 +301,15 @@ console.log(response)
               <TableRow>
                 <TableCell colSpan={4} className="h-24 text-center">
                   <Loader2 className="mx-auto h-6 w-6 animate-spin" />
+                </TableCell>
+              </TableRow>
+            ) : loadError ? (
+              <TableRow>
+                <TableCell
+                  colSpan={4}
+                  className="h-24 text-center text-muted-foreground"
+                >
+                  Submissions could not be loaded.
                 </TableCell>
               </TableRow>
             ) : submissions.length === 0 ? (

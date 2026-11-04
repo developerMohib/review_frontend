@@ -1,4 +1,4 @@
-import { api } from "@/lib/axios";
+import { apiServer } from "@/lib/axios";
 import {
   MySubmissionsResponse,
   SubmissionInput,
@@ -6,7 +6,7 @@ import {
 } from "@/lib/validators/submission.validation";
 
 export const createSubmissionRequest = async (input: SubmissionInput) => {
-  const res = await api.post<SubmissionResponse>("/submissions", input);
+  const res = await apiServer.post<SubmissionResponse>("/submissions", input);
 
   return {
     message: res.data.message,
@@ -23,7 +23,7 @@ export const getMySubmissionsRequest = async ({
   limit?: number;
   status?: string;
 } = {}) => {
-  const res = await api.get("/submissions/my", {
+  const res = await apiServer.get("/submissions/my", {
     params: { page, limit, status },
   });
 
@@ -49,7 +49,7 @@ export const getAllSubmissionsRequest = async (params?: {
   const queryString = queryParams.toString();
   const url = `/submissions/all${queryString ? `?${queryString}` : ""}`;
 
-  const res = await api.get<MySubmissionsResponse>(url);
+  const res = await apiServer.get<MySubmissionsResponse>(url);
   return res.data.data;
 };
 
@@ -57,7 +57,7 @@ export const updateSubmissionStatusRequest = async (
   submissionId: string,
   status: "approved" | "rejected"
 ) => {
-  const res = await api.patch(`/submissions/update/${submissionId}`, {
+  const res = await apiServer.patch(`/submissions/update/${submissionId}`, {
     status,
   });
 

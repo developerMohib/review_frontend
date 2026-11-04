@@ -2,11 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
 import { ArrowRight, Check, Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 
@@ -15,38 +14,40 @@ import AuthShowcase from "@/components/auth/AuthShowcase";
 
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { api } from "@/lib/axios";
-import { getErrorMessage } from "@/lib/api/auth";
+import { getPublicErrorMessage } from "@/lib/api/errors.public";
+import { usePublicRegisterMutation } from "@/lib/hooks/usePublicAuth";
 import { SignupInput, signupSchema } from "@/lib/validators/auth.validation";
 
 export default function SignupForm() {
   const [showPass, setShowPass] = useState(false);
+  const router = useRouter();
 
   const form = useForm<SignupInput>({
     resolver: zodResolver(signupSchema),
     defaultValues: { name: "", email: "", password: "" },
   });
 
-  const { mutate, isPending } = useMutation({
-    mutationFn: async (data: SignupInput) => {
-      const response = await api.post<{ success: boolean; message: string }>("/auth/register", data);
-      return response.data;
-    },
-    onSuccess: (response) => {
-      toast.success(response.message || "Account created successfully!");
-      setTimeout(() => {
-        redirect("/login");
-      }, 1000);
-    },
-    onError: (error) => {
-      const errorMsg = getErrorMessage(error);
-      toast.error(errorMsg);
-      form.setError("root", { message: errorMsg });
-    },
-  });
+  const { mutate: submitPublicRegistration, isPending: isPublicRegistrationPending } =
+    usePublicRegisterMutation();
 
-  const onSubmit = (data: SignupInput) => {
-    mutate(data);
+  const handlePublicRegistration = (publicSignupInput: SignupInput) => {
+    submitPublicRegistration(publicSignupInput, {
+      onSuccess: (publicRegistrationResult) => {
+        toast.success(
+          publicRegistrationResult.message || "Account created successfully!",
+        );
+        setTimeout(() => {
+          router.replace("/login");
+        }, 1000);
+      },
+      onError: (publicRegistrationError) => {
+        const publicErrorMessage = getPublicErrorMessage(
+          publicRegistrationError,
+        );
+        toast.error(publicErrorMessage);
+        form.setError("root", { message: publicErrorMessage });
+      },
+    });
   };
 
   return (
@@ -67,7 +68,7 @@ export default function SignupForm() {
           Join the project review community and share what you’re building.
         </p>
 
-        <form onSubmit={form.handleSubmit(onSubmit)} className="auth-form space-y-4">
+        <form onSubmit={form.handleSubmit(handlePublicRegistration)} className="auth-form space-y-4">
           <FieldGroup>
             <Controller
               name="name"
@@ -152,9 +153,9 @@ export default function SignupForm() {
             <Button
               type="submit"
               className="primary-button auth-submit w-full h-11 text-sm font-semibold mt-2"
-              disabled={isPending}
+              disabled={isPublicRegistrationPending}
             >
-              {isPending ? (
+              {isPublicRegistrationPending ? (
                 <Loader2 className="size-4 animate-spin" />
               ) : (
                 <>

@@ -1,15 +1,20 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-// ⚠️ Next.js 16-তে proxy ফাংশনকে 'default' export করতে হয়
 export default function proxy(request: NextRequest) {
-  const token = request.cookies.get('token')?.value;
-  if (!token) {
-    return NextResponse.redirect(new URL('/login', request.url));
+  if (request.nextUrl.pathname.startsWith("/dashboard")) {
+    const token = request.cookies.get("token")?.value;
+
+    if (!token) {
+      const loginUrl = new URL("/login", request.url);
+      loginUrl.searchParams.set("callbackUrl", request.nextUrl.pathname);
+      return NextResponse.redirect(loginUrl);
+    }
   }
+
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*'],
+  matcher: ["/dashboard/:path*"],
 };
