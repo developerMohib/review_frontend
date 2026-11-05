@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 type RouteContext = {
-  params: Promise<{ path: string[] }>;
+  params: Promise<{ path?: string[] }>;
 };
 
 async function proxySubmissionRequest(
@@ -28,9 +28,10 @@ async function proxySubmissionRequest(
   }
 
   try {
-    const { path } = await params;
+    const { path = [] } = await params;
     const resourcePath = path.map(encodeURIComponent).join("/");
-    const targetUrl = `${apiUrl.replace(/\/$/, "")}/submissions/${resourcePath}${request.nextUrl.search}`;
+    const submissionPath = resourcePath ? `/submissions/${resourcePath}` : "/submissions";
+    const targetUrl = `${apiUrl.replace(/\/$/, "")}${submissionPath}${request.nextUrl.search}`;
     const headers: Record<string, string> = {
       Cookie: `token=${token}`,
     };
