@@ -12,7 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getMySubmissionsRequest } from "@/lib/api/submission";
+import { getMySubmissionsRequest } from "@/lib/apiServices/submissionServices";
 import { Submission } from "@/lib/validators/submission.validation";
 
 export default function MySubmissions() {

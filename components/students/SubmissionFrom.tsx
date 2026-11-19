@@ -4,8 +4,6 @@ import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import { ArrowLeft, ArrowRight, Code2, ExternalLink, Info, Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { apiServer } from "@/lib/axios";
-import { getPublicErrorMessage } from "@/lib/api/errors.public";
 import { submissionSchema } from "@/lib/validators/submission.validation";
 
 export default function SubmissionForm() {
