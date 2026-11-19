@@ -1,10 +1,13 @@
 import StudentDashboard from '@/components/students/StudentDashboard';
-import { requireAuthServer } from "@/lib/api/auth.server";
+import { getCurrentUser } from '@/lib/apiServices/authService';
+import Loading from '../loading';
 
 export default async function StudentDashboardPage() {
-  const serverUser = await requireAuthServer();
-
-  return <StudentDashboard user={serverUser} />;
+  const user = await getCurrentUser();
+  if (!user) {
+    return <Loading />;
+  }
+  return <StudentDashboard user={user} />;
 }
 
 export const instant = false;

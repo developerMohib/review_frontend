@@ -18,14 +18,14 @@ import {
   SubmissionStats,
   SubmissionStatus,
 } from "@/lib/validators/submission.validation";
-import { getAllSubmissionsRequest, updateSubmissionStatusRequest } from "@/lib/api/submission";
-import { getPublicErrorMessage } from "@/lib/api/errors.public";
+import { getAllSubmissionsRequest, updateSubmissionStatusRequest } from "@/lib/apiServices/submissionServices";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
 
 export type FilterStatus = "all" | SubmissionStatus;
 type PageNumber = number | "ellipsis";
 
-export default function MentorDashboard() {
+export default function MentorDashboard({user}: {user: {role: string}}) {
+  console.log("MentorDashboard user:", user);
   const router = useRouter();
   
   // Existing States
@@ -76,7 +76,8 @@ export default function MentorDashboard() {
             handleUnauthorized();
             return;
           }
-          setLoadError(getPublicErrorMessage(error));
+          // setLoadError(error);
+          console.error("Error fetching submissions:", error);
         }
       } finally {
         if (active) setLoading(false);
@@ -115,7 +116,8 @@ export default function MentorDashboard() {
         handleUnauthorized();
         return;
       }
-      setLoadError(getPublicErrorMessage(error));
+      // setLoadError(getPublicErrorMessage(error));
+      console.error("Error submitting review:", error);
     } finally {
       setIsSubmitting(false);
     }

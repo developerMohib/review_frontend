@@ -14,7 +14,7 @@ interface StudentDashboardProps {
 
 export default function StudentDashboard({ user }: StudentDashboardProps) {
     const userName = user.name || "Student";
-
+console.log("StudentDashboard user:", user);
   return (
     <div className="dashboard-page student-dashboard">
       <div className="page-heading">

@@ -21,10 +21,9 @@ import {
 } from "@/components/ui/card";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { getPublicErrorMessage } from "@/lib/api/errors.public";
-import { usePublicLoginMutation } from "@/lib/hooks/usePublicAuth";
 import { LoginInput, loginSchema } from "@/lib/validators/auth.validation";
 import { UserRole } from "@/types";
+import { loginUser } from "@/lib/apiServices/authService";
 
 export default function LoginForm() {
   const [showPass, setShowPass] = useState(false);
@@ -47,53 +46,22 @@ export default function LoginForm() {
     }
   };
 
-  const { mutate: submitPublicLogin, isPending: isPublicLoginPending } =
-    usePublicLoginMutation();
-
-  const handlePublicLogin = (publicLoginInput: LoginInput) => {
-    submitPublicLogin(publicLoginInput, {
-      onSuccess: (publicLoginResult) => {
-        toast.success("Login successful!");
-
-        const publicUserRole = publicLoginResult.user.role;
-        const publicDashboardRoutes: Record<string, string> = {
-          mentor: "/dashboard/mentor",
-          admin: "/dashboard/admin",
-          student: "/dashboard/student",
-        };
-
-        const defaultRoute =
-          publicDashboardRoutes[publicUserRole] ?? "/dashboard/student";
-        const callbackUrl = new URLSearchParams(window.location.search).get(
-          "callbackUrl",
-        );
-        let destination = defaultRoute;
-
-        if (callbackUrl) {
-          try {
-            const callback = new URL(callbackUrl, window.location.origin);
-            const isDashboardPath =
-              callback.pathname === "/dashboard" ||
-              callback.pathname.startsWith("/dashboard/");
-
-            if (callback.origin === window.location.origin && isDashboardPath) {
-              destination = `${callback.pathname}${callback.search}${callback.hash}`;
-            }
-          } catch {
-            // Fall back to the user's role dashboard for an invalid callback URL.
-          }
-        }
-
-        router.replace(destination);
-        router.refresh();
-      },
-      onError: (publicLoginError) => {
-        const publicErrorMessage = getPublicErrorMessage(publicLoginError);
-        toast.error(publicErrorMessage);
-        form.setError("root", { message: publicErrorMessage });
-      },
-    });
-  };
+  const {formState:{isSubmitting}} =form;
+  const onSubmit = async(data: LoginInput) => {
+    try {
+      const res = await loginUser(data);
+      if (res.success) {
+        toast.success(res.message);
+        router.push("/dashboard");
+      } else {
+        toast.error(res.message || "Login failed");
+      }
+    }catch (error) {
+      console.error("Login error:", error);
+      toast.error("Login failed. Hey, Dev - Server error.");
+    }
+  }
+  
   return (
     <main className="auth-page">
       <section className="auth-panel">
@@ -145,7 +113,7 @@ export default function LoginForm() {
               </Button>
             </div>
 
-            <form onSubmit={form.handleSubmit(handlePublicLogin)} className="auth-form">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="auth-form">
               <FieldGroup>
                 <Controller
                   name="email"
@@ -217,9 +185,9 @@ export default function LoginForm() {
                 <Button
                   type="submit"
                   className="primary-button auth-submit w-full h-11 text-sm font-semibold mt-2"
-                  disabled={isPublicLoginPending}
+                  disabled={isSubmitting}
                 >
-                  {isPublicLoginPending ? (
+                  {isSubmitting ? (
                     <Loader2 className="size-4 animate-spin" />
                   ) : (
                     <>
