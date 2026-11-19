@@ -1,7 +1,26 @@
-import DashboardPageBasedRole from "@/components/shared/DashboardPageBasedRole";
+import React from "react";
+import { getCurrentUser } from "@/lib/apiServices/authService";
+import { redirect } from "next/navigation";
+import AdminDashboard from "@/components/admin/AdminDashboard";
+import MentorDashboard from "@/components/mentor/MentorDashboard";
+import StudentDashboard from "@/components/students/StudentDashboard";
 
-export default function DashboardPage() {
-  return <DashboardPageBasedRole />;
-}
+const DashboardPage = async () => {
+  const currentUser = await getCurrentUser();
 
-export const instant = false;
+  if (!currentUser) {
+    redirect("/login");
+  }
+
+  if (currentUser.role === "admin") {
+    return <AdminDashboard user={currentUser} />;
+  }
+
+  if (currentUser.role === "mentor") {
+    return <MentorDashboard user={currentUser} />;
+  }
+
+  return <StudentDashboard user={currentUser} />;
+};
+
+export default DashboardPage;

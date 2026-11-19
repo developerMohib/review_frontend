@@ -1,18 +1,22 @@
-import { apiServer } from "@/lib/axios";
+"use server"
 import {
   MySubmissionsResponse,
   SubmissionInput,
   SubmissionResponse,
 } from "@/lib/validators/submission.validation";
 
-import { api } from "../axios";
 
 export const createSubmissionRequest = async (input: SubmissionInput) => {
-  const res = await apiServer.post<SubmissionResponse>("/submissions", input);
+  // const res = await apiServer.post<SubmissionResponse>("/submissions", input);
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/submissions`, {
+    method: "POST",
+    headers: {}});
+
+  const data = await res.json();
 
   return {
-    message: res.data.message,
-    submission: res.data.data,
+    message: data.message,
+    submission: data.data,
   };
 };
 
@@ -25,13 +29,17 @@ export const getMySubmissionsRequest = async ({
   limit?: number;
   status?: string;
 } = {}) => {
-  const res = await apiServer.get("/submissions/my", {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/submissions/my`, {
+    method: "GET",
+    headers: {},
     params: { page, limit, status },
   });
 
+  const data = await res.json();
+
   return {
-    submissions: res.data.data.submissions,
-    pagination: res.data.data.pagination,
+    submissions: data.data.submissions,
+    pagination: data.data.pagination,
   };
 };
 
@@ -51,30 +59,24 @@ export const getAllSubmissionsRequest = async (params?: {
   const queryString = queryParams.toString();
   const url = `/submissions/all${queryString ? `?${queryString}` : ""}`;
 
-  const res = await apiServer.get<MySubmissionsResponse>(url);
-  return res.data.data;
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${url}`, {
+    method: "GET",
+    headers: {},
+  });
+  const data = await res.json();
+  return data.data;
 };
-
-// export const updateSubmissionStatusRequest = async (
-//   submissionId: string,
-//   status: "approved" | "rejected"
-// ) => {
-//   const res = await apiServer.patch(`/submissions/update/${submissionId}`, {
-//     status,
-//   });
-
-//   return res.data;
-// };
-// lib/api/submission.ts
 
 export const updateSubmissionStatusRequest = async (
   submissionId: string,
   status: "approved" | "rejected",
   comment: string // নতুন প্যারামিটার
 ) => {
-  const { data } = await api.patch(`/submissions/update/${submissionId}`, {
-    status,
-    comment, // ব্যাকএন্ডে পাঠানো হচ্ছে
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/submissions/update/${submissionId}`, {
+    method: "PATCH",
+    headers: {},
+    body: JSON.stringify({ status, comment }),
   });
+  const data = await res.json();
   return data;
 };

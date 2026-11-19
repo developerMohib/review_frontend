@@ -6,4 +6,9 @@ export interface UserData {
   name: string;
   email: string;
   role: UserRole;
+  createdAt?: string;
+  updatedAt?: string;
+  bio?: string;
+  avatar?: string;
+  phone?: string;
 }

@@ -42,22 +42,20 @@ const studentNavigation = [
 ];
 
 interface SidebarProps {
-  role: UserRole;
-  onSignOut: () => void;
-  isLoggingOut: boolean;
+  currentUser: {
+    role: UserRole;
+  } | null;
 }
 
 export default function Sidebar({
-  role,
-  onSignOut,
-  isLoggingOut,
+  currentUser
 }: SidebarProps) {
   const pathname = usePathname();
-
+console.log("Current User in Sidebar:", currentUser);
   const navigation =
-    role === "student" ? studentNavigation : mentorNavigation;
+    currentUser?.role === "student" ? studentNavigation : mentorNavigation;
 
-  const home = role === "student" ? "/dashboard/student" : "/dashboard";
+  const home = currentUser?.role === "student" ? "/dashboard/student" : "/dashboard";
 
   return (
     <aside className="dashboard-sidebar">
@@ -115,13 +113,13 @@ export default function Sidebar({
           </div>
 
           <strong>
-            {role === "student"
+            {currentUser?.role === "student"
               ? "Keep building"
               : "Thoughtful reviews matter"}
           </strong>
 
           <p>
-            {role === "student"
+            {currentUser?.role === "student"
               ? "Every submission is a step forward. Share your next idea with the community."
               : "A few thoughtful notes can help a project move forward."}
           </p>
@@ -129,14 +127,11 @@ export default function Sidebar({
 
         <Button
           type="button"
-          onClick={onSignOut}
-          disabled={isLoggingOut}
           className="sidebar-logout"
           variant="outline"
         >
           <LogOut size={16} />
-
-          {isLoggingOut ? "Signing out..." : "Sign out"}
+          <span>Sign out</span>
         </Button>
       </div>
     </aside>
