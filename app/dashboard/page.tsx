@@ -5,10 +5,8 @@ import MentorOverview from "@/components/dashboard/MentorOverview";
 import StudentOverview from "@/components/dashboard/StudentOverview";
 import { Card, CardContent } from "@/components/ui/card";
 import { getCurrentUser } from "@/lib/apiServices/authService";
-import { connection } from "next/server";
 
 const DashboardHomePage = async () => {
-    await connection();
     const currentUser = await getCurrentUser().catch(() => null);
     if (!currentUser) {
         redirect("/login");

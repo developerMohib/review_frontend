@@ -34,7 +34,7 @@ const navByRole: Record<string, NavItem[]> = {
   ],
   mentor: [
     { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
-    { href: "/dashboard/mentor", label: "Review Projects", icon: ClipboardList },
+    { href: "/dashboard/assignment-manage", label: "Review Assignment", icon: ClipboardList },
   ],
   student: [
     { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
