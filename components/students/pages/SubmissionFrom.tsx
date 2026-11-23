@@ -8,7 +8,6 @@ import {
   Code2,
   ExternalLink,
   Info,
-  Sparkles,
   Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -75,7 +74,7 @@ export default function SubmissionForm() {
 
   return (
     <Card className="w-full border-border/60 shadow-sm">
-      <CardContent className="grid gap-6 p-4 md:grid-cols-[1fr_300px] md:p-6">
+      <CardContent className="p-4 md:p-6">
 
         {/* Submission Form */}
         <Card className="border-0 shadow-none">
@@ -228,43 +227,6 @@ export default function SubmissionForm() {
           </CardContent>
         </Card>
 
-        {/* Sidebar */}
-        <Card className="h-fit border-primary/10 bg-primary/[0.03] shadow-none">
-          <CardContent className="space-y-4 p-5">
-
-            <Sparkles className="size-6 text-primary" />
-
-            <CardContent className="space-y-2 p-0">
-              <p className="text-xs font-semibold tracking-wider text-primary">
-                A QUICK TIP
-              </p>
-
-              <CardTitle className="text-lg">
-                Help your project shine
-              </CardTitle>
-
-              <CardDescription className="leading-relaxed">
-                A clear README and a working demo help your mentor understand
-                your work and give more useful feedback.
-              </CardDescription>
-            </CardContent>
-
-            <CardContent className="space-y-3 p-0 text-sm">
-              {[
-                "Repository is public or accessible",
-                "Include setup instructions",
-                "Add a live demo if you can",
-              ].map((tip) => (
-                <CardContent key={tip} className="flex items-center gap-2 p-0">
-                  <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs text-primary">
-                    ✓
-                  </span>
-                  <span>{tip}</span>
-                </CardContent>
-              ))}
-            </CardContent>
-          </CardContent>
-        </Card>
 
         {/* Information */}
         <Card className="border-blue-500/20 bg-blue-500/5 shadow-none md:col-span-2">

@@ -1,71 +1,156 @@
-// components/students/MySubmissions.tsx
 import { FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
 import type { Submission } from "@/lib/validators/submission.validation";
+import { truncateWords } from "@/lib/utils";
 
 const statusClasses: Record<string, string> = {
   approved: "status-approved",
   rejected: "status-changes",
   pending: "status-pending",
 };
-
-export default function MySubmissions({ submissions }: { submissions: Submission[] }) {
+export default function MySubmissions({
+  submissions,
+}: {
+  submissions: Submission[];
+}) {
   return (
-    <div className="dashboard-page submissions-page">
-      <div className="page-heading">
-        <div>
-          <div className="eyebrow">
-            <span className="eyebrow-dot" /> STUDENT WORKSPACE
-          </div>
-          <h1>My submissions</h1>
-          <p>Keep track of the projects you have shared for review.</p>
-        </div>
-        <Badge variant="outline" className="submission-heading-meta">
-          {submissions.length} {submissions.length === 1 ? "project" : "projects"}
-        </Badge>
-      </div>
+    <Card className="dashboard-page submissions-page border-0 shadow-none border-none">
 
-      <div className="submission-table-wrap">
+      {/* Page Heading */}
+      <CardHeader className="flex flex-row items-center justify-between gap-4 px-0">
+
+        <CardContent className="space-y-2 p-0">
+
+          <CardDescription className="flex items-center gap-2 text-xs font-semibold tracking-wider">
+            <span className="size-2 rounded-full bg-primary" />
+            STUDENT WORKSPACE
+          </CardDescription>
+
+          <CardTitle className="text-2xl font-bold tracking-tight">
+            My submissions
+          </CardTitle>
+
+          <CardDescription>
+            Keep track of the projects you have shared for review.
+          </CardDescription>
+
+        </CardContent>
+
+        <Badge variant="outline" className="shrink-0">
+          {submissions.length}{" "}
+          {submissions.length === 1 ? "project" : "projects"}
+        </Badge>
+
+      </CardHeader>
+
+      {/* Submission Table */}
+      <CardContent className="overflow-hidden rounded-xl border p-0">
+
         <Table>
+
           <TableHeader>
             <TableRow>
-              <TableHead className="min-w-50">Project</TableHead>
-              <TableHead className="min-w-65">Description</TableHead>
-              <TableHead className="min-w-35">Category</TableHead>
-              <TableHead className="min-w-32.5">Status</TableHead>
+              <TableHead >
+                S/N
+              </TableHead>
+              <TableHead >
+                Project Title
+              </TableHead>
+
+              <TableHead className="min-w-65">
+                Description
+              </TableHead>
+
+              <TableHead>
+                Category
+              </TableHead>
+
+              <TableHead>
+                Status
+              </TableHead>
             </TableRow>
           </TableHeader>
+
           <TableBody>
+
             {submissions.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={4} className="h-40 text-center">
-                  <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
-                    <FileText className="h-9 w-9 opacity-50" />
-                    <p>No submissions yet. Your shared projects will appear here.</p>
-                  </div>
+
+                  <CardContent className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
+
+                    <FileText className="size-9 opacity-50" />
+
+                    <CardDescription>
+                      No submissions yet. Your shared projects will appear here.
+                    </CardDescription>
+
+                  </CardContent>
+
                 </TableCell>
               </TableRow>
             ) : (
-              submissions.map((s) => {
+              submissions?.map((s, idx) => {
                 const status = s.status.toLowerCase();
+
                 return (
                   <TableRow key={s.id}>
-                    <TableCell className="font-semibold text-foreground">{s.projectName}</TableCell>
-                    <TableCell className="max-w-md truncate text-muted-foreground">{s.description}</TableCell>
-                    <TableCell><span className="category-chip">{s.category}</span></TableCell>
+
+                    <TableCell className="font-semibold text-foreground">
+                      {idx + 1}
+                    </TableCell>
+                    <TableCell className="font-semibold text-foreground">
+                      {s.projectName}
+                    </TableCell>
+
+                    <TableCell className="max-w-md truncate text-muted-foreground text-wrap">
+                      {truncateWords(s.description, 5)}
+                    </TableCell>
+
                     <TableCell>
-                      <Badge variant="outline" className={`status-badge ${statusClasses[status] ?? ""}`}>
+                      <Badge variant="secondary">
+                        {s.category}
+                      </Badge>
+                    </TableCell>
+
+                    <TableCell>
+                      <Badge
+                        variant="outline"
+                        className={`status-badge ${statusClasses[status] ?? ""}`}
+                      >
                         {status}
                       </Badge>
                     </TableCell>
+
                   </TableRow>
                 );
               })
             )}
+
           </TableBody>
+
         </Table>
-      </div>
-    </div>
+
+      </CardContent>
+
+    </Card>
   );
 }

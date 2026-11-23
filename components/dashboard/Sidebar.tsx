@@ -162,9 +162,8 @@ export default function Sidebar() {
           {isPending ? (
             <Loader2 size={18} className="animate-spin" />
           ) : (
-            <LogOut size={18} />
-          )}
-          <span>{isPending ? "Signing out..." : "Sign out"}</span>
+            <span>{isPending ? "Signing out..." : "Sign out"}</span>
+          )}<LogOut size={18} />
         </Button>
       </div>
     </aside>
