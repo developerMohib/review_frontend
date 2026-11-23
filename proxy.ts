@@ -4,9 +4,9 @@ import { getCurrentUser } from "./lib/apiServices/authService";
 const authRoutes = ["/login", "/register"];
 type Role = keyof typeof roleBasedRoutes;
 const roleBasedRoutes = {
-  mentor: [/^\/dashboard\/mentor/],
-  admin: [/^\/dashboard\/admin/],
-  user: [/^\/dashboard\/user/],
+  mentor: [/^\/dashboard/],
+  admin: [/^\/dashboard/],
+  student: [/^\/dashboard/],
 };
 export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -17,21 +17,19 @@ export default async function proxy(request: NextRequest) {
     } else {
       return NextResponse.redirect(
         new URL(
-          `${request.nextUrl.origin}/login?redirect=${encodeURIComponent(pathname)}`,
+          `${request.nextUrl.origin}/login?callbackUrl=${encodeURIComponent(pathname)}`,
           request.url,
         ),
       );
     }
   }
-  //  else {
-  //   return NextResponse.redirect(new URL(`${request.nextUrl.origin}/dashboard`, request.url));
-  // }
   if (userInfo?.role && roleBasedRoutes[userInfo?.role as Role]) {
     const routes = roleBasedRoutes[userInfo?.role as Role];
-    if(routes.some(route=>pathname.match(route))){
-      return NextResponse.next()
+    if (routes.some((route) => pathname.match(route))) {
+      return NextResponse.next();
     }
   }
+  return NextResponse.redirect(new URL("/", request.url));
 }
 
 export const config = {

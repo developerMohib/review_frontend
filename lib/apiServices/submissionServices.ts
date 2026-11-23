@@ -1,9 +1,12 @@
 "use server"
 import {
-  MySubmissionsResponse,
+  PaginationData,
+  Submission,
   SubmissionInput,
-  SubmissionResponse,
+  SubmissionStats,
 } from "@/lib/validators/submission.validation";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 
 export const createSubmissionRequest = async (input: SubmissionInput) => {
@@ -20,7 +23,7 @@ export const createSubmissionRequest = async (input: SubmissionInput) => {
   };
 };
 
-export const getMySubmissionsRequest = async ({
+export async function getMySubmissionsServer({
   page = 1,
   limit = 10,
   status,
@@ -28,44 +31,65 @@ export const getMySubmissionsRequest = async ({
   page?: number;
   limit?: number;
   status?: string;
-} = {}) => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/submissions/my`, {
-    method: "GET",
-    headers: {},
-    params: { page, limit, status },
-  });
+} = {}) {
+  const qs = new URLSearchParams({ page: String(page), limit: String(limit) });
+  if (status && status !== "all") qs.set("status", status);
 
-  const data = await res.json();
+  const cookieStore = await cookies();
 
-  return {
-    submissions: data.data.submissions,
-    pagination: data.data.pagination,
-  };
-};
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/submissions/my?${qs}`,
+    {
+      cache: "no-store",
+      headers: { Cookie: cookieStore.toString() },
+    }
+  );
 
-export const getAllSubmissionsRequest = async (params?: {
-  page?: number;
-  limit?: number;
-  status?: string;
-}) => {
-  const queryParams = new URLSearchParams();
-  if (params?.page) queryParams.append("page", params.page.toString());
-  if (params?.limit) queryParams.append("limit", params.limit.toString());
-
-  if (params?.status && params.status !== "all") {
-    queryParams.append("status", params.status);
+  if (res.status === 401) {
+    redirect(`/login?callbackUrl=${encodeURIComponent("/dashboard/my-submissions")}`);
   }
+  if (!res.ok) throw new Error(`Failed to load submissions (${res.status})`);
 
-  const queryString = queryParams.toString();
-  const url = `/submissions/all${queryString ? `?${queryString}` : ""}`;
+  const json = await res.json();
+  return {
+    submissions: (json.data.submissions ?? []) as Submission[],
+    pagination: json.data.pagination as PaginationData,
+  };
+}
 
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${url}`, {
-    method: "GET",
-    headers: {},
+export async function getAllSubmissionsServer(params: {
+  page: number;
+  limit: number;
+  status: string;
+}) {
+  const qs = new URLSearchParams({
+    page: String(params.page),
+    limit: String(params.limit),
   });
-  const data = await res.json();
-  return data.data;
-};
+  if (params.status !== "all") qs.set("status", params.status);
+
+
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/submissions/all?${qs}`,
+    {
+      cache: "no-store",
+     
+    }
+  );
+
+  if (res.status === 401) {
+    redirect(`/login?callbackUrl=${encodeURIComponent("/dashboard/mentor")}`);
+  }
+  if (!res.ok) throw new Error(`Failed to load submissions (${res.status})`);
+
+  const json = await res.json();
+  console.log(' json',json)
+  return json.data as {
+    submissions: Submission[];
+    pagination: PaginationData;
+    stats: SubmissionStats;
+  };
+}
 
 export const updateSubmissionStatusRequest = async (
   submissionId: string,

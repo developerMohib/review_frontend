@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRight, Eye, EyeOff, Loader2, ShieldCheck, User, GraduationCap } from "lucide-react";
@@ -28,7 +28,8 @@ import { loginUser } from "@/lib/apiServices/authService";
 export default function LoginForm() {
   const [showPass, setShowPass] = useState(false);
   const router = useRouter();
-
+  const searchParams = useSearchParams()
+  const redirect = searchParams.get("redirect")
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: "", password: "" },
@@ -46,22 +47,26 @@ export default function LoginForm() {
     }
   };
 
-  const {formState:{isSubmitting}} =form;
-  const onSubmit = async(data: LoginInput) => {
+  const { formState: { isSubmitting } } = form;
+  const onSubmit = async (data: LoginInput) => {
     try {
       const res = await loginUser(data);
       if (res.success) {
         toast.success(res.message);
-        router.push("/dashboard");
+        if (redirect) {
+          router.push(redirect)
+        } else {
+          router.push("/dashboard");
+        }
       } else {
         toast.error(res.message || "Login failed");
       }
-    }catch (error) {
+    } catch (error) {
       console.error("Login error:", error);
       toast.error("Login failed. Hey, Dev - Server error.");
     }
   }
-  
+
   return (
     <main className="auth-page">
       <section className="auth-panel">

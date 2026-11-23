@@ -4,6 +4,8 @@ import { getCurrentUser } from "@/lib/apiServices/authService";
 import { UserData } from "@/types";
 import {
   createContext,
+  Dispatch,
+  SetStateAction,
   useCallback,
   useContext,
   useEffect,
@@ -16,6 +18,7 @@ import {
 interface UserContextType {
   user: UserData | null;
   loading: boolean;
+  setLoading: Dispatch<SetStateAction<boolean>>;
   refreshUser: () => Promise<void>;
   setUser: (user: UserData | null) => void;
 }
@@ -60,8 +63,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const value = useMemo(
-    () => ({ user, loading, refreshUser, setUser }),
-    [user, loading, refreshUser]
+    () => ({ user, loading, refreshUser, setUser ,setLoading}),
+    [user, loading, refreshUser,setLoading]
   );
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
