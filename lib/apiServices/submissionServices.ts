@@ -49,11 +49,13 @@ export async function getSubmissionByIdServer(submissionId: string) {
 
 
 export const createSubmissionRequest = async (input: SubmissionInput) => {
-  console.log(input)
   // const res = await apiServer.post<SubmissionResponse>("/submissions", input);
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/submissions`, {
-    method: "POST",
-    headers: {}});
+  method: "POST",
+  credentials: "include", // cookie auto jabe
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(input),
+});
 
   const data = await res.json();
 

@@ -23,6 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { logOut } from "@/lib/apiServices/authService";
 import { useUser } from "@/provider/UserContext";
+import { Skeleton } from "../ui/skeleton";
 
 type NavItem = { href: string; label: string; icon: LucideIcon };
 
@@ -43,9 +44,8 @@ const navByRole: Record<string, NavItem[]> = {
   ],
 };
 
-
 export default function Sidebar() {
-  const { user: currentUser } = useUser()
+  const { user: currentUser, loading } = useUser();
   const pathname = usePathname() ?? "";
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -70,15 +70,16 @@ export default function Sidebar() {
     });
   };
 
+  // All hooks are above this line, so this early return is safe
+  if (loading) {
+    return <Skeleton className="sticky top-0 h-screen w-72 shrink-0 rounded-none" />;
+  }
+
   return (
     <aside className="sticky top-0 flex h-screen w-72 shrink-0 flex-col border-r bg-background">
       {/* Brand */}
       <div className="flex h-20 items-center px-6">
-        <Link
-          href="/dashboard"
-          className="flex items-center"
-          aria-label="Dashboard home"
-        >
+        <Link href="/dashboard" className="flex items-center" aria-label="Dashboard home">
           <Image
             src="/coderabbit-logo.png"
             alt="CodeRabbit"
@@ -93,7 +94,7 @@ export default function Sidebar() {
       <Separator />
 
       {/* Navigation */}
-      <div className="flex-1 overflow-y-auto px-4 mt-10">
+      <div className="mt-10 flex-1 overflow-y-auto px-4">
         <p className="mb-3 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Workspace
         </p>
@@ -114,19 +115,15 @@ export default function Sidebar() {
                 )}
               >
                 <Icon size={18} className="shrink-0" />
-
                 <span className="truncate">{label}</span>
               </Link>
             );
           })}
         </nav>
-
       </div>
 
       {/* Bottom Section */}
       <div className="space-y-4 p-4">
-
-        {/* User + Logout */}
         <div className="flex items-center gap-3 px-1">
           <Avatar className="size-9">
             <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
@@ -143,9 +140,7 @@ export default function Sidebar() {
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium">
-              {currentUser?.name ?? "Guest"}
-            </p>
+            <p className="truncate text-sm font-medium">{currentUser?.name ?? "Guest"}</p>
             <Badge variant="secondary" className="mt-0.5 capitalize">
               {role}
             </Badge>
@@ -162,8 +157,9 @@ export default function Sidebar() {
           {isPending ? (
             <Loader2 size={18} className="animate-spin" />
           ) : (
-            <span>{isPending ? "Signing out..." : "Sign out"}</span>
-          )}<LogOut size={18} />
+            <LogOut size={18} />
+          )}
+          <span>{isPending ? "Signing out..." : "Sign out"}</span>
         </Button>
       </div>
     </aside>

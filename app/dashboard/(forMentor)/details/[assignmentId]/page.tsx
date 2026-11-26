@@ -9,7 +9,6 @@ import {
   Globe,
   MessageSquareText,
   UserRound,
-  Loader2,
 } from "lucide-react";
 
 import {

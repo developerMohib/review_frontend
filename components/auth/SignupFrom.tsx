@@ -33,7 +33,6 @@ export default function SignupForm() {
     const { name, email, password } = data;
     try {
       const res = await registerUser({ name, email, password });
-      console.log("Registration response:", res);
       if (res.success) {
         toast.success(res.message);
         router.push("/login");
