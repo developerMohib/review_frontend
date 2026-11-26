@@ -3,6 +3,8 @@
 import { cookies } from "next/headers";
 import { LoginInput, SignupInput } from "../validators/auth.validation";
 import { jwtDecode } from "jwt-decode";
+import { redirect } from "next/navigation";
+
 
 export const registerUser = async (userData: SignupInput) => {
   try {
@@ -60,3 +62,23 @@ export const getCurrentUser = async () => {
     return Error(error as any).message;
   }
 };
+
+export async function logOut() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value;
+
+  if (token) {
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/logout`, {
+        method: "POST",
+        headers: { Cookie: `token=${token}` },
+        cache: "no-store",
+      });
+    } catch (error) {
+      console.error("Logout API error:", error);
+    }
+  }
+
+  cookieStore.delete("token");
+  redirect("/login");
+}

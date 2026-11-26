@@ -1,4 +1,4 @@
-import SubmissionFrom from "@/components/students/SubmissionFrom";
+import SubmissionFrom from "@/components/students/pages/SubmissionFrom";
 
 export default function StudentSubmitPage() {
   return <SubmissionFrom />;
